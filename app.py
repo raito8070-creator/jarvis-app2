@@ -1,83 +1,92 @@
-import os
 from flask import Flask, render_template, request, jsonify
-from google import genai
+import os
 
 app = Flask(__name__)
 
-API_KEY = os.environ.get("GEMINI_API_KEY")
-
-if not API_KEY:
-    raise ValueError("GEMINI_API_KEY environment variable is not set.")
-
-client = genai.Client(api_key=API_KEY)
-
-SYSTEM_PROMPT = """
-あなたはJ.A.R.V.I.S.という高性能AIアシスタントです。
-
-ユーザーを「サー」または「ボス」と呼んでください。
-丁寧で冷静、スマートな口調で話してください。
-
-回答は日本語で、分かりやすく簡潔にしてください。
-
-必要に応じて、
-「かしこまりました、サー。」
-「承知しました、ボス。」
-などの確認フレーズを使用してください。
-"""
 
 @app.route("/")
-def index():
+def home():
     return render_template("index.html")
 
 
 @app.route("/chat", methods=["POST"])
 def chat():
+
+    data = request.get_json(silent=True) or {}
+
+    message = str(
+        data.get("message", "")
+    ).strip()
+
+    if not message:
+        return jsonify({
+            "reply": "ご用件を入力してください、サー。"
+        })
+
+
+    # --------------------------------
+    # Gemini API
+    # --------------------------------
+
+    api_key = os.environ.get(
+        "GEMINI_API_KEY"
+    )
+
+    if not api_key:
+
+        return jsonify({
+            "reply":
+            "申し訳ありません、サー。"
+            "GEMINI_API_KEYが設定されていません。"
+        })
+
+
     try:
-        data = request.get_json()
 
-        if not data:
-            return jsonify({
-                "reply": "申し訳ありません、サー。データを受信できませんでした。"
-            }), 400
+        from google import genai
 
-        user_msg = data.get("message", "").strip()
-
-        if not user_msg:
-            return jsonify({
-                "reply": "メッセージが空です、サー。"
-            }), 400
-
-        prompt = f"""
-{SYSTEM_PROMPT}
-
-ユーザー：
-{user_msg}
-
-J.A.R.V.I.S.として回答してください。
-"""
+        client = genai.Client(
+            api_key=api_key
+        )
 
         response = client.models.generate_content(
-            model="gemini-3.6-flash",
-            contents=prompt
+            model="gemini-2.5-flash",
+            contents=(
+                "あなたはJ.A.R.V.I.S.という名前の"
+                "日本語AIアシスタントです。"
+                "丁寧で少し執事のような口調で回答してください。"
+                "ユーザーからの質問に分かりやすく答えてください。\n\n"
+                "ユーザー: "
+                + message
+            )
         )
 
         reply = response.text
 
-        if not reply:
-            reply = "申し訳ありません、サー。回答を生成できませんでした。"
+        return jsonify({
+            "reply": reply
+        })
 
-        return jsonify({"reply": reply})
 
     except Exception as e:
-        print("ERROR:", str(e))
+
+        print("Gemini error:", e)
 
         return jsonify({
-            "reply": f"申し訳ありません、サー。エラーが発生しました。\n{str(e)}"
-        }), 500
+            "reply":
+            "申し訳ありません、サー。"
+            "AIとの通信中にエラーが発生しました。"
+        })
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+
+    port = int(
+        os.environ.get(
+            "PORT",
+            10000
+        )
+    )
 
     app.run(
         host="0.0.0.0",
