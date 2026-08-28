@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>J.A.R.V.I.S.</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background: #02090b;
+    color: #d9ffff;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+/* ======================================
+   HEADER
+====================================== */
+
+.header {
+
+    height: 74px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 24px;
+
+    border-bottom: 1px solid
+        rgba(0, 255, 255, 0.25);
+
+    background:
+        linear-gradient(
+            180deg,
+            #061216,
+            #02090b
+        );
+
+}
+
+.logo {
+
+    font-size: 27px;
+
+    letter-spacing: 8px;
+
+    font-weight: 500;
+
+    color: #72ffff;
+
+    text-shadow:
+        0 0 10px #00ffff,
+        0 0 25px rgba(0,255,255,.4);
+
+}
+
+.status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color: #54ffc9;
+
+    font-size: 14px;
+
+}
+
+.status-dot {
+
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    background: #4dffb5;
+
+    box-shadow:
+        0 0 10px #00ffae;
+
+}
+
+/* ======================================
+   MAIN
+====================================== */
+
+.main {
+
+    width: 100%;
+
+    max-width: 850px;
+
+    margin: auto;
+
+    padding: 25px 16px 30px;
+
+}
+
+/* ======================================
+   CORE
+====================================== */
+
+.core-area {
+
+    height: 590px;
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    overflow: hidden;
+
+    border-bottom: 1px solid
+        rgba(0,255,255,.18);
+
+}
+
+.core {
+
+    width: 300px;
+    height: 300px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            #ffffff 0%,
+            #53ffff 4%,
+            #00cfcf 12%,
+            #06393b 38%,
+            #021315 62%,
+            #02090b 70%
+        );
+
+    box-shadow:
+        0 0 25px #00ffff,
+        0 0 70px #00ffff,
+        0 0 130px rgba(0,255,255,.6);
+
+    animation:
+        pulse 3s ease-in-out infinite;
+
+}
+
+.core-ring {
+
+    position: absolute;
+
+    width: 500px;
+    height: 500px;
+
+    border: 1px solid
+        rgba(0,255,255,.25);
+
+    border-radius: 50%;
+
+    animation:
+        rotate 12s linear infinite;
+
+}
+
+.core-ring::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 150px;
+    height: 150px;
+
+    top: -20px;
+    left: 170px;
+
+    border-top: 4px solid #59ffff;
+
+    border-radius: 50%;
+
+}
+
+.core-ring-2 {
+
+    width: 630px;
+    height: 630px;
+
+    border-color:
+        rgba(0,255,255,.12);
+
+    animation-duration: 18s;
+
+    animation-direction: reverse;
+
+}
+
+.core-ring-3 {
+
+    width: 400px;
+    height: 700px;
+
+    border-color:
+        rgba(0,255,255,.12);
+
+    transform: rotate(25deg);
+
+}
+
+/* ======================================
+   STATS
+====================================== */
+
+.stats {
+
+    position: absolute;
+
+    left: 20px;
+
+    bottom: 30px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    color: #5e8585;
+
+    font-family: monospace;
+
+}
+
+.stats span {
+
+    color: #6affff;
+
+    font-size: 18px;
+
+}
+
+/* ======================================
+   CHAT
+====================================== */
+
+.chat {
+
+    min-height: 420px;
+
+    padding: 25px 10px;
+
+}
+
+.message {
+
+    max-width: 88%;
+
+    margin-bottom: 14px;
+
+    padding: 15px 18px;
+
+    border-left: 4px solid #46ffff;
+
+    background:
+        rgba(0, 255, 255, .045);
+
+    line-height: 1.8;
+
+    font-size: 17px;
+
+    white-space: pre-wrap;
+
+}
+
+.message .name {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #659999;
+
+    font-size: 13px;
+
+    letter-spacing: 4px;
+
+}
+
+.user {
+
+    margin-left: auto;
+
+    border-left: none;
+
+    border-right: 4px solid #ff8c3a;
+
+    background:
+        rgba(255,140,50,.045);
+
+}
+
+/* ======================================
+   INPUT
+====================================== */
+
+.input-area {
+
+    position: sticky;
+
+    bottom: 0;
+
+    padding: 16px 0 5px;
+
+    background:
+        linear-gradient(
+            transparent,
+            #02090b 25%
+        );
+
+}
+
+.input-row {
+
+    display: flex;
+
+    gap: 10px;
+
+}
+
+.input {
+
+    flex: 1;
+
+    min-width: 0;
+
+    height: 62px;
+
+    padding: 0 18px;
+
+    border-radius: 12px;
+
+    border: 1px solid
+        rgba(0,255,255,.35);
+
+    outline: none;
+
+    background:
+        rgba(0,20,22,.7);
+
+    color: white;
+
+    font-size: 18px;
+
+}
+
+.input:focus {
+
+    border-color: #53ffff;
+
+    box-shadow:
+        0 0 15px
+        rgba(0,255,255,.2);
+
+}
+
+.button {
+
+    width: 80px;
+
+    height: 62px;
+
+    border-radius: 12px;
+
+    border: 1px solid #55ffff;
+
+    background:
+        rgba(0,255,255,.06);
+
+    color: #65ffff;
+
+    font-size: 28px;
+
+    cursor: pointer;
+
+}
+
+.button:active {
+
+    transform: scale(.95);
+
+}
+
+/* ======================================
+   MIC
+====================================== */
+
+.mic.listening {
+
+    background:
+        rgba(255,70,70,.18);
+
+    border-color: #ff6464;
+
+    color: #ff7777;
+
+    box-shadow:
+        0 0 25px
+        rgba(255,50,50,.4);
+
+    animation:
+        micPulse 1s infinite;
+
+}
+
+/* ======================================
+   FOOTER
+====================================== */
+
+.footer {
+
+    text-align: center;
+
+    padding: 18px;
+
+    color: #315d5d;
+
+    font-size: 12px;
+
+    letter-spacing: 4px;
+
+}
+
+/* ======================================
+   ANIMATION
+====================================== */
+
+@keyframes pulse {
+
+    0%,100% {
+        transform: scale(.96);
+    }
+
+    50% {
+        transform: scale(1.04);
+    }
+
+}
+
+@keyframes rotate {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+@keyframes micPulse {
+
+    0%,100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.08);
+    }
+
+}
+
+/* ======================================
+   MOBILE
+====================================== */
+
+@media(max-width:600px) {
+
+    .header {
+
+        padding: 0 15px;
+
+    }
+
+    .logo {
+
+        font-size: 21px;
+
+        letter-spacing: 5px;
+
+    }
+
+    .main {
+
+        padding: 10px 15px 25px;
+
+    }
+
+    .core-area {
+
+        height: 530px;
+
+    }
+
+    .core {
+
+        width: 250px;
+        height: 250px;
+
+    }
+
+    .core-ring {
+
+        width: 430px;
+        height: 430px;
+
+    }
+
+    .core-ring-2 {
+
+        width: 550px;
+        height: 550px;
+
+    }
+
+    .core-ring-3 {
+
+        width: 350px;
+        height: 600px;
+
+    }
+
+    .stats {
+
+        left: 10px;
+
+        bottom: 20px;
+
+    }
+
+    .message {
+
+        max-width: 92%;
+
+        font-size: 16px;
+
+    }
+
+    .input {
+
+        font-size: 16px;
+
+    }
+
+    .button {
+
+        width: 65px;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header class="header">
+
+    <div class="logo">
+        J.A.R.V.I.S.
+    </div>
+
+    <div class="status">
+
+        <span class="status-dot"></span>
+
+        <span id="statusText">
+            ONLINE
+        </span>
+
+    </div>
+
+</header>
+
+
+<main class="main">
+
+
+    <!-- CORE -->
+
+    <section class="core-area">
+
+        <div class="core-ring"></div>
+
+        <div class="core-ring core-ring-2"></div>
+
+        <div class="core-ring core-ring-3"></div>
+
+        <div class="core"></div>
+
+
+        <div class="stats">
+
+            <div>
+                CPU
+                <span id="cpu">32%</span>
+            </div>
+
+            <div>
+                MEMORY
+                <span id="memory">51%</span>
+            </div>
+
+            <div>
+                LATENCY
+                <span id="latency">92 ms</span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- CHAT -->
+
+    <section
+        class="chat"
+        id="chat"
+    >
+
+        <div class="message">
+
+            <span class="name">
+                J.A.R.V.I.S.
+            </span>
+
+            かしこまりました、サー。<br>
+            システムは正常に起動しております。<br>
+            何をお手伝いしましょうか？
+
+        </div>
+
+    </section>
+
+
+    <!-- INPUT -->
+
+    <section class="input-area">
+
+        <div class="input-row">
+
+            <input
+                id="messageInput"
+                class="input"
+                type="text"
+                placeholder="J.A.R.V.I.S.に指示してください.."
+                autocomplete="off"
+            >
+
+            <button
+                id="micButton"
+                class="button mic"
+                title="声で話しかける"
+            >
+                🎙️
+            </button>
+
+            <button
+                id="sendButton"
+                class="button"
+                title="送信"
+            >
+                ➤
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <div class="footer">
+
+        SECURE CHANNEL　//　VOICE + TEXT INTERFACE
+
+    </div>
+
+
+</main>
+
+
+<script>
+
+/* ======================================
+   VARIABLES
+====================================== */
+
+const input =
+    document.getElementById("messageInput");
+
+const sendButton =
+    document.getElementById("sendButton");
+
+const micButton =
+    document.getElementById("micButton");
+
+const chat =
+    document.getElementById("chat");
+
+const statusText =
+    document.getElementById("statusText");
+
+
+let history = [];
+
+let recognition = null;
+
+let isListening = false;
+
+
+/* ======================================
+   CHAT MESSAGE
+====================================== */
+
+function addMessage(
+    text,
+    type
+) {
+
+    const div =
+        document.createElement("div");
+
+    div.className =
+        "message " +
+        (type === "user" ? "user" : "");
+
+    const name =
+        document.createElement("span");
+
+    name.className = "name";
+
+    name.textContent =
+        type === "user"
+        ? "YOU"
+        : "J.A.R.V.I.S.";
+
+    const content =
+        document.createElement("div");
+
+    content.textContent = text;
+
+    div.appendChild(name);
+
+    div.appendChild(content);
+
+    chat.appendChild(div);
+
+    chat.scrollTop =
+        chat.scrollHeight;
+
+}
+
+
+/* ======================================
+   SEND MESSAGE
+====================================== */
+
+async function sendMessage() {
+
+    const message =
+        input.value.trim();
+
+    if (!message) return;
+
+
+    addMessage(
+        message,
+        "user"
+    );
+
+    input.value = "";
+
+
+    statusText.textContent =
+        "PROCESSING";
+
+
+    history.push({
+        role: "user",
+        text: message
+    });
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/chat",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        message: message,
+                        history: history
+                    })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        const reply =
+            data.reply ||
+            "申し訳ありません、サー。";
+
+
+        addMessage(
+            reply,
+            "assistant"
+        );
+
+
+        history.push({
+            role: "assistant",
+            text: reply
+        });
+
+
+        /* 音声読み上げ */
+
+        speak(reply);
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        const errorText =
+            "申し訳ありません、サー。通信エラーが発生しました。";
+
+        addMessage(
+            errorText,
+            "assistant"
+        );
+
+    }
+
+
+    statusText.textContent =
+        "ONLINE";
+
+}
+
+
+/* ======================================
+   ENTER KEY
+====================================== */
+
+input.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            sendMessage();
+
+        }
+
+    }
+);
+
+
+/* ======================================
+   SEND BUTTON
+====================================== */
+
+sendButton.addEventListener(
+    "click",
+    sendMessage
+);
+
+
+/* ======================================
+   VOICE RECOGNITION
+====================================== */
+
+const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+
+if (SpeechRecognition) {
+
+    recognition =
+        new SpeechRecognition();
+
+    recognition.lang =
+        "ja-JP";
+
+    recognition.continuous =
+        false;
+
+    recognition.interimResults =
+        false;
+
+
+    recognition.onstart =
+        function() {
+
+            isListening = true;
+
+            micButton.classList.add(
+                "listening"
+            );
+
+            statusText.textContent =
+                "LISTENING";
+
+        };
+
+
+    recognition.onresult =
+        function(event) {
+
+            const text =
+                event.results[0][0].transcript;
+
+            input.value = text;
+
+            isListening = false;
+
+            micButton.classList.remove(
+                "listening"
+            );
+
+            statusText.textContent =
+                "ONLINE";
+
+
+            /* 音声入力後、自動送信 */
+
+            sendMessage();
+
+        };
+
+
+    recognition.onerror =
+        function(event) {
+
+            console.error(
+                "Speech recognition error:",
+                event.error
+            );
+
+            isListening = false;
+
+            micButton.classList.remove(
+                "listening"
+            );
+
+            statusText.textContent =
+                "ONLINE";
+
+
+            if (
+                event.error ===
+                "not-allowed"
+            ) {
+
+                addMessage(
+                    "マイクへのアクセスが許可されていません、サー。ブラウザのマイク権限をご確認ください。",
+                    "assistant"
+                );
+
+            }
+
+        };
+
+
+    recognition.onend =
+        function() {
+
+            isListening = false;
+
+            micButton.classList.remove(
+                "listening"
+            );
+
+            statusText.textContent =
+                "ONLINE";
+
+        };
+
+
+    micButton.addEventListener(
+        "click",
+        function() {
+
+            if (isListening) {
+
+                recognition.stop();
+
+                return;
+
+            }
+
+            try {
+
+                recognition.start();
+
+            } catch (error) {
+
+                console.log(error);
+
+            }
+
+        }
+    );
+
+} else {
+
+    micButton.addEventListener(
+        "click",
+        function() {
+
+            addMessage(
+                "申し訳ありません、サー。このブラウザでは音声入力に対応していません。",
+                "assistant"
+            );
+
+        }
+    );
+
+}
+
+
+/* ======================================
+   TEXT TO SPEECH
+====================================== */
+
+function speak(text) {
+
+    if (
+        !("speechSynthesis" in window)
+    ) {
+
+        return;
+
+    }
+
+
+    window.speechSynthesis.cancel();
+
+
+    const utterance =
+        new SpeechSynthesisUtterance(
+            text
+        );
+
+
+    utterance.lang =
+        "ja-JP";
+
+    utterance.rate =
+        0.95;
+
+    utterance.pitch =
+        0.9;
+
+    utterance.volume =
+        1.0;
+
+
+    window.speechSynthesis.speak(
+        utterance
+    );
+
+}
+
+
+/* ======================================
+   SYSTEM STATS
+====================================== */
+
+function updateStats() {
+
+    const cpu =
+        Math.floor(
+            25 + Math.random() * 35
+        );
+
+    const memory =
+        Math.floor(
+            45 + Math.random() * 20
+        );
+
+    const latency =
+        Math.floor(
+            70 + Math.random() * 40
+        );
+
+
+    document.getElementById(
+        "cpu"
+    ).textContent =
+        cpu + "%";
+
+
+    document.getElementById(
+        "memory"
+    ).textContent =
+        memory + "%";
+
+
+    document.getElementById(
+        "latency"
+    ).textContent =
+        latency + " ms";
+
+}
+
+
+setInterval(
+    updateStats,
+    2000
+);
+
+
+/* ======================================
+   STARTUP
+====================================== */
+
+console.log(
+    "J.A.R.V.I.S. online."
+);
+
+</script>
+
+
+</body>
+
+</html>
