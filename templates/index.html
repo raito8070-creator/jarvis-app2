@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J.A.R.V.I.S.</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #05090b;
+    color: #d9ffff;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+}
+
+header {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+    border-bottom: 1px solid #16464b;
+    background: #071114;
+}
+
+.logo {
+    font-size: 24px;
+    letter-spacing: 5px;
+    color: #7fffff;
+    font-weight: bold;
+}
+
+.status {
+    color: #55ffcc;
+    font-size: 13px;
+}
+
+.main {
+    display: grid;
+    grid-template-columns: 230px 1fr 230px;
+    gap: 15px;
+    padding: 15px;
+    min-height: calc(100vh - 70px);
+}
+
+.panel {
+    background: rgba(7, 20, 23, 0.9);
+    border: 1px solid #14565c;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.panel h3 {
+    margin-top: 0;
+    color: #64ffff;
+    font-size: 14px;
+    letter-spacing: 2px;
+}
+
+.line {
+    height: 1px;
+    background: #17474c;
+    margin: 12px 0;
+}
+
+.data {
+    font-size: 12px;
+    line-height: 2;
+    color: #a7caca;
+}
+
+.center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.core {
+    width: min(430px, 75vw);
+    height: min(430px, 75vw);
+    border-radius: 50%;
+    margin-top: 25px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background:
+        radial-gradient(circle,
+        #eaffff 0%,
+        #62ffff 5%,
+        #18cbd0 12%,
+        #073b42 35%,
+        transparent 65%);
+    box-shadow:
+        0 0 30px #00ffff,
+        0 0 70px rgba(0,255,255,.4),
+        inset 0 0 50px #00ffff;
+}
+
+.core::before,
+.core::after {
+    content: "";
+    position: absolute;
+    border: 1px solid #54ffff;
+    border-radius: 50%;
+}
+
+.core::before {
+    width: 85%;
+    height: 55%;
+    transform: rotate(25deg);
+}
+
+.core::after {
+    width: 55%;
+    height: 85%;
+    transform: rotate(-25deg);
+}
+
+.core-text {
+    z-index: 2;
+    text-align: center;
+    font-weight: bold;
+    letter-spacing: 4px;
+    text-shadow: 0 0 15px cyan;
+}
+
+.chat {
+    width: 100%;
+    margin-top: 20px;
+    border: 1px solid #14565c;
+    background: #071114;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.messages {
+    height: 180px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.jarvis {
+    color: #6fffff;
+}
+
+.user {
+    color: #ffffff;
+    text-align: right;
+}
+
+.input-area {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+input {
+    flex: 1;
+    background: #020607;
+    border: 1px solid #1b777e;
+    color: white;
+    padding: 13px;
+    border-radius: 5px;
+    outline: none;
+}
+
+button {
+    background: #063c42;
+    border: 1px solid #40ffff;
+    color: #bfffff;
+    padding: 10px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #09646b;
+}
+
+.bar {
+    height: 8px;
+    background: #092b30;
+    margin: 8px 0 15px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.bar span {
+    display: block;
+    height: 100%;
+    background: #39ffff;
+    box-shadow: 0 0 10px cyan;
+}
+
+.small {
+    font-size: 11px;
+    color: #73999b;
+}
+
+@media (max-width: 800px) {
+    .main {
+        grid-template-columns: 1fr;
+    }
+
+    .panel {
+        display: none;
+    }
+
+    .core {
+        width: 75vw;
+        height: 75vw;
+    }
+
+    header {
+        padding: 0 15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">J.A.R.V.I.S.</div>
+    <div class="status">● ONLINE</div>
+</header>
+
+<div class="main">
+
+    <aside class="panel">
+        <h3>SYSTEM</h3>
+        <div class="line"></div>
+
+        <div class="data">
+            POWER
+            <div class="bar"><span style="width:92%"></span></div>
+
+            MEMORY
+            <div class="bar"><span style="width:68%"></span></div>
+
+            NETWORK
+            <div class="bar"><span style="width:96%"></span></div>
+
+            CORE TEMP
+            <br>
+            32.4°C
+        </div>
+
+        <div class="line"></div>
+
+        <h3>MODULES</h3>
+        <div class="data">
+            ● AI CORE<br>
+            ● VOICE SYSTEM<br>
+            ● SECURITY<br>
+            ● DATA LINK<br>
+            ● ASSISTANT
+        </div>
+    </aside>
+
+
+    <main class="center">
+
+        <div class="core">
+            <div class="core-text">
+                J.A.R.V.I.S.<br>
+                <span class="small">AI CORE ACTIVE</span>
+            </div>
+        </div>
+
+        <div class="chat">
+
+            <div class="messages" id="messages">
+                <div class="jarvis">
+                    J.A.R.V.I.S.: かしこまりました、サー。<br>
+                    システムは正常に稼働しています。
+                </div>
+            </div>
+
+            <div class="input-area">
+                <input
+                    id="message"
+                    type="text"
+                    placeholder="メッセージを入力..."
+                    onkeydown="if(event.key==='Enter') sendMessage()"
+                >
+                <button onclick="sendMessage()">SEND</button>
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <aside class="panel">
+        <h3>DIAGNOSTICS</h3>
+        <div class="line"></div>
+
+        <div class="data">
+            STATUS<br>
+            <span style="color:#55ffcc">OPERATIONAL</span>
+
+            <br><br>
+
+            AI MODEL<br>
+            GEMINI
+
+            <br><br>
+
+            CONNECTION<br>
+            SECURE
+
+            <br><br>
+
+            RESPONSE<br>
+            READY
+        </div>
+
+        <div class="line"></div>
+
+        <h3>LOG</h3>
+        <div class="small">
+            SYSTEM INITIALIZED<br>
+            AI CORE CONNECTED<br>
+            NETWORK SECURED<br>
+            WAITING FOR INPUT...
+        </div>
+    </aside>
+
+</div>
+
+
+<script>
+async function sendMessage() {
+
+    const input = document.getElementById("message");
+    const messages = document.getElementById("messages");
+
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    messages.innerHTML +=
+        `<div class="user">YOU: ${escapeHtml(text)}</div>`;
+
+    input.value = "";
+
+    messages.innerHTML +=
+        `<div class="jarvis" id="loading">J.A.R.V.I.S.: 処理中です、サー...</div>`;
+
+    messages.scrollTop = messages.scrollHeight;
+
+    try {
+
+        const response = await fetch("/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: text
+            })
+        });
+
+        const data = await response.json();
+
+        document.getElementById("loading").remove();
+
+        messages.innerHTML +=
+            `<div class="jarvis">J.A.R.V.I.S.: ${escapeHtml(data.reply)}</div>`;
+
+    } catch (error) {
+
+        document.getElementById("loading").remove();
+
+        messages.innerHTML +=
+            `<div class="jarvis">J.A.R.V.I.S.: 接続エラーです、サー。</div>`;
+    }
+
+    messages.scrollTop = messages.scrollHeight;
+}
+
+
+function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+
+</body>
+</html>
