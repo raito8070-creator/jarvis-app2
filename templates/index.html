@@ -2,397 +2,811 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05090a">
+
 <title>J.A.R.V.I.S.</title>
 
 <style>
-* {
-    box-sizing: border-box;
+*{
+  box-sizing:border-box;
 }
 
-body {
-    margin: 0;
-    background: #05090b;
-    color: #d9ffff;
-    font-family: Arial, sans-serif;
-    min-height: 100vh;
+html,body{
+  margin:0;
+  min-height:100%;
+  background:#05090a;
+  color:#e7fffc;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 
-header {
-    height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 25px;
-    border-bottom: 1px solid #16464b;
-    background: #071114;
+body{
+  background:
+    radial-gradient(circle at 50% 35%,#0b292b 0,#071416 30%,#05090a 70%);
+  overflow-x:hidden;
 }
 
-.logo {
-    font-size: 24px;
-    letter-spacing: 5px;
-    color: #7fffff;
-    font-weight: bold;
+.app{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:220px minmax(0,1fr) 240px;
+  gap:12px;
+  padding:12px;
 }
 
-.status {
-    color: #55ffcc;
-    font-size: 13px;
+.panel{
+  background:rgba(6,17,19,.9);
+  border:1px solid rgba(95,255,238,.18);
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 0 30px rgba(0,255,235,.04);
 }
 
-.main {
-    display: grid;
-    grid-template-columns: 230px 1fr 230px;
-    gap: 15px;
-    padding: 15px;
-    min-height: calc(100vh - 70px);
+.side,.right{
+  padding:15px;
 }
 
-.panel {
-    background: rgba(7, 20, 23, 0.9);
-    border: 1px solid #14565c;
-    border-radius: 8px;
-    padding: 15px;
+.brand{
+  color:#5fffee;
+  font-weight:700;
+  letter-spacing:2px;
+  font-size:18px;
+  margin-bottom:22px;
 }
 
-.panel h3 {
-    margin-top: 0;
-    color: #64ffff;
-    font-size: 14px;
-    letter-spacing: 2px;
+.dot{
+  display:inline-block;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#5fffee;
+  box-shadow:0 0 15px #5fffee;
+  margin-right:8px;
 }
 
-.line {
-    height: 1px;
-    background: #17474c;
-    margin: 12px 0;
+.title{
+  font-size:10px;
+  letter-spacing:2px;
+  color:#52736f;
+  margin:18px 0 8px;
 }
 
-.data {
-    font-size: 12px;
-    line-height: 2;
-    color: #a7caca;
+.nav,.card{
+  padding:10px;
+  margin:4px 0;
+  border:1px solid transparent;
+  border-radius:7px;
+  color:#8ca8a4;
+  font-size:13px;
 }
 
-.center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.nav.active{
+  color:#5fffee;
+  background:rgba(95,255,238,.07);
+  border-color:rgba(95,255,238,.15);
 }
 
-.core {
-    width: min(430px, 75vw);
-    height: min(430px, 75vw);
-    border-radius: 50%;
-    margin-top: 25px;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background:
-        radial-gradient(circle,
-        #eaffff 0%,
-        #62ffff 5%,
-        #18cbd0 12%,
-        #073b42 35%,
-        transparent 65%);
-    box-shadow:
-        0 0 30px #00ffff,
-        0 0 70px rgba(0,255,255,.4),
-        inset 0 0 50px #00ffff;
+.card{
+  border-color:rgba(95,255,238,.1);
+  font-family:monospace;
+  font-size:11px;
+  line-height:1.7;
 }
 
-.core::before,
-.core::after {
-    content: "";
-    position: absolute;
-    border: 1px solid #54ffff;
-    border-radius: 50%;
+.main{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
 }
 
-.core::before {
-    width: 85%;
-    height: 55%;
-    transform: rotate(25deg);
+.top{
+  height:55px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 15px;
+  border-bottom:1px solid rgba(95,255,238,.15);
+  font:11px monospace;
 }
 
-.core::after {
-    width: 55%;
-    height: 85%;
-    transform: rotate(-25deg);
+.online{
+  color:#5fffee;
 }
 
-.core-text {
-    z-index: 2;
-    text-align: center;
-    font-weight: bold;
-    letter-spacing: 4px;
-    text-shadow: 0 0 15px cyan;
+.online i{
+  display:inline-block;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#55ffbb;
+  box-shadow:0 0 10px #55ffbb;
+  margin-right:7px;
 }
 
-.chat {
-    width: 100%;
-    margin-top: 20px;
-    border: 1px solid #14565c;
-    background: #071114;
-    border-radius: 8px;
-    padding: 15px;
+.core{
+  height:410px;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
 }
 
-.messages {
-    height: 180px;
-    overflow-y: auto;
-    font-size: 14px;
-    line-height: 1.7;
+.label{
+  position:absolute;
+  top:22px;
+  color:#5fffee;
+  font:11px monospace;
+  letter-spacing:4px;
 }
 
-.jarvis {
-    color: #6fffff;
+.orbit{
+  position:absolute;
+  width:330px;
+  height:330px;
+  border:1px solid rgba(95,255,238,.13);
+  border-radius:50%;
+  animation:spin 15s linear infinite;
 }
 
-.user {
-    color: #ffffff;
-    text-align: right;
+.orbit:nth-child(3){
+  width:250px;
+  height:250px;
+  border-color:rgba(255,139,61,.12);
+  animation-direction:reverse;
 }
 
-.input-area {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
+.orbit:nth-child(4){
+  width:430px;
+  height:180px;
+  transform:rotate(-25deg);
+  animation-duration:11s;
 }
 
-input {
-    flex: 1;
-    background: #020607;
-    border: 1px solid #1b777e;
-    color: white;
-    padding: 13px;
-    border-radius: 5px;
-    outline: none;
+.arc{
+  position:absolute;
+  width:230px;
+  height:230px;
+  border:2px solid transparent;
+  border-top-color:#5fffee;
+  border-radius:50%;
+  filter:drop-shadow(0 0 10px #5fffee);
+  animation:spin 5s linear infinite;
 }
 
-button {
-    background: #063c42;
-    border: 1px solid #40ffff;
-    color: #bfffff;
-    padding: 10px 18px;
-    border-radius: 5px;
-    cursor: pointer;
+@keyframes spin{
+  to{
+    transform:rotate(360deg);
+  }
 }
 
-button:hover {
-    background: #09646b;
+.reactor{
+  width:145px;
+  height:145px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(
+      circle,
+      #eaffff 0 4%,
+      #8ffff2 10%,
+      #21d9cf 25%,
+      rgba(0,150,145,.2) 50%,
+      transparent 70%
+    );
+  box-shadow:
+    0 0 35px #5fffee,
+    0 0 90px rgba(24,216,204,.3);
+  animation:pulse 2.5s ease-in-out infinite;
+  z-index:2;
 }
 
-.bar {
-    height: 8px;
-    background: #092b30;
-    margin: 8px 0 15px;
-    border-radius: 10px;
-    overflow: hidden;
+@keyframes pulse{
+  50%{
+    transform:scale(1.06);
+  }
 }
 
-.bar span {
-    display: block;
-    height: 100%;
-    background: #39ffff;
-    box-shadow: 0 0 10px cyan;
+.reactor b{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:white;
+  box-shadow:
+    0 0 25px white,
+    0 0 55px #5fffee;
 }
 
-.small {
-    font-size: 11px;
-    color: #73999b;
+.metrics{
+  position:absolute;
+  left:15px;
+  bottom:15px;
+  color:#527572;
+  font:10px monospace;
+  line-height:1.8;
 }
 
-@media (max-width: 800px) {
-    .main {
-        grid-template-columns: 1fr;
-    }
+.metrics b{
+  color:#5fffee;
+}
 
-    .panel {
-        display: none;
-    }
+.chat{
+  height:350px;
+  display:flex;
+  flex-direction:column;
+  border-top:1px solid rgba(95,255,238,.15);
+}
 
-    .core {
-        width: 75vw;
-        height: 75vw;
-    }
+.messages{
+  flex:1;
+  overflow:auto;
+  padding:12px;
+}
 
-    header {
-        padding: 0 15px;
-    }
+.msg{
+  max-width:86%;
+  padding:9px 11px;
+  margin:6px 0;
+  background:rgba(95,255,238,.045);
+  border-left:2px solid #5fffee;
+  font-size:13px;
+  line-height:1.55;
+}
+
+.msg.user{
+  margin-left:auto;
+  border-left:0;
+  border-right:2px solid #ff8b3d;
+  background:rgba(255,139,61,.045);
+}
+
+.tag{
+  font:9px monospace;
+  color:#557975;
+  letter-spacing:1px;
+  margin-bottom:3px;
+}
+
+.composer{
+  display:flex;
+  gap:7px;
+  padding:10px;
+  border-top:1px solid rgba(95,255,238,.12);
+}
+
+input{
+  flex:1;
+  min-width:0;
+  background:#071011;
+  border:1px solid rgba(95,255,238,.2);
+  border-radius:6px;
+  padding:11px;
+  color:white;
+  outline:none;
+}
+
+button{
+  width:48px;
+  border:1px solid #5fffee;
+  background:rgba(95,255,238,.08);
+  color:#5fffee;
+  border-radius:6px;
+  font-size:18px;
+}
+
+button:active{
+  transform:scale(.95);
+}
+
+#mic{
+  cursor:pointer;
+}
+
+#mic.listening{
+  background:rgba(255,70,70,.25);
+  border-color:#ff7070;
+}
+
+.read{
+  font:10px monospace;
+  color:#60807b;
+  line-height:1.8;
+}
+
+.bar{
+  height:5px;
+  background:#102526;
+  border-radius:3px;
+  margin:5px 0 14px;
+  overflow:hidden;
+}
+
+.bar i{
+  display:block;
+  height:100%;
+  background:#5fffee;
+  box-shadow:0 0 8px #5fffee;
+}
+
+.log{
+  font:10px monospace;
+  color:#52716d;
+  border-top:1px solid rgba(95,255,238,.08);
+  padding:9px 0;
+}
+
+.log b{
+  color:#70d8cf;
+}
+
+.footer{
+  text-align:center;
+  color:#3f5b58;
+  font:9px monospace;
+  padding:7px;
+  letter-spacing:1px;
+}
+
+@media(max-width:900px){
+
+  .app{
+    display:block;
+    padding:7px;
+  }
+
+  .side,
+  .right{
+    display:none;
+  }
+
+  .core{
+    height:390px;
+  }
+
+  .chat{
+    height:350px;
+  }
+
+  .main{
+    min-height:calc(100vh - 14px);
+  }
+
+  .composer{
+    padding:10px;
+  }
+
+  input{
+    font-size:16px;
+  }
+
 }
 </style>
 </head>
 
 <body>
 
-<header>
-    <div class="logo">J.A.R.V.I.S.</div>
-    <div class="status">● ONLINE</div>
+<div class="app">
+
+<aside class="panel side">
+
+<div class="brand">
+<span class="dot"></span>
+J.A.R.V.I.S.
+</div>
+
+<div class="title">SYSTEM</div>
+
+<div class="nav active">◉ Neural Core</div>
+<div class="nav">⌁ Conversation</div>
+<div class="nav">◈ Diagnostics</div>
+<div class="nav">▣ Memory</div>
+
+<div class="title">MODULES</div>
+
+<div class="card">
+VOICE INTERFACE<br>
+<b style="color:#55ffbb">ONLINE</b>
+</div>
+
+<div class="card">
+GEMINI ENGINE<br>
+<b style="color:#55ffbb">READY</b>
+</div>
+
+<div class="card">
+WEB SERVICE<br>
+<b style="color:#55ffbb">CONNECTED</b>
+</div>
+
+</aside>
+
+
+<main class="panel main">
+
+<header class="top">
+
+<span class="online">
+<i></i>
+SYSTEM ONLINE
+</span>
+
+<span id="clock">
+--:--:--
+</span>
+
 </header>
 
-<div class="main">
 
-    <aside class="panel">
-        <h3>SYSTEM</h3>
-        <div class="line"></div>
+<section class="core">
 
-        <div class="data">
-            POWER
-            <div class="bar"><span style="width:92%"></span></div>
+<div class="label">
+J.A.R.V.I.S. // NEURAL INTERFACE
+</div>
 
-            MEMORY
-            <div class="bar"><span style="width:68%"></span></div>
+<div class="orbit"></div>
+<div class="orbit"></div>
+<div class="orbit"></div>
+<div class="arc"></div>
 
-            NETWORK
-            <div class="bar"><span style="width:96%"></span></div>
+<div class="reactor">
+<b></b>
+</div>
 
-            CORE TEMP
-            <br>
-            32.4°C
-        </div>
+<div class="metrics">
+CPU <b id="cpu">--</b>%<br>
+MEMORY <b id="mem">--</b>%<br>
+LATENCY <b id="lat">--</b> ms
+</div>
 
-        <div class="line"></div>
-
-        <h3>MODULES</h3>
-        <div class="data">
-            ● AI CORE<br>
-            ● VOICE SYSTEM<br>
-            ● SECURITY<br>
-            ● DATA LINK<br>
-            ● ASSISTANT
-        </div>
-    </aside>
+</section>
 
 
-    <main class="center">
+<section class="chat">
 
-        <div class="core">
-            <div class="core-text">
-                J.A.R.V.I.S.<br>
-                <span class="small">AI CORE ACTIVE</span>
-            </div>
-        </div>
+<div class="messages" id="messages">
 
-        <div class="chat">
+<div class="msg">
 
-            <div class="messages" id="messages">
-                <div class="jarvis">
-                    J.A.R.V.I.S.: かしこまりました、サー。<br>
-                    システムは正常に稼働しています。
-                </div>
-            </div>
+<div class="tag">
+J.A.R.V.I.S.
+</div>
 
-            <div class="input-area">
-                <input
-                    id="message"
-                    type="text"
-                    placeholder="メッセージを入力..."
-                    onkeydown="if(event.key==='Enter') sendMessage()"
-                >
-                <button onclick="sendMessage()">SEND</button>
-            </div>
+かしこまりました、サー。<br>
+システムは正常に起動しています。<br>
+何をお手伝いしましょうか？
 
-        </div>
+</div>
 
-    </main>
+</div>
 
 
-    <aside class="panel">
-        <h3>DIAGNOSTICS</h3>
-        <div class="line"></div>
+<form class="composer" id="form">
 
-        <div class="data">
-            STATUS<br>
-            <span style="color:#55ffcc">OPERATIONAL</span>
+<input
+id="message"
+autocomplete="off"
+placeholder="J.A.R.V.I.S.に指示してください…"
+>
 
-            <br><br>
+<button
+type="button"
+id="mic"
+title="音声入力"
+>
+🎤
+</button>
 
-            AI MODEL<br>
-            GEMINI
+<button type="submit">
+➤
+</button>
 
-            <br><br>
+</form>
 
-            CONNECTION<br>
-            SECURE
+</section>
 
-            <br><br>
 
-            RESPONSE<br>
-            READY
-        </div>
+<div class="footer">
+SECURE CHANNEL // VOICE + TEXT INTERFACE
+</div>
 
-        <div class="line"></div>
+</main>
 
-        <h3>LOG</h3>
-        <div class="small">
-            SYSTEM INITIALIZED<br>
-            AI CORE CONNECTED<br>
-            NETWORK SECURED<br>
-            WAITING FOR INPUT...
-        </div>
-    </aside>
+
+<aside class="panel right">
+
+<div class="title">
+SYSTEM DIAGNOSTICS
+</div>
+
+<div class="read">
+NEURAL PROCESSING
+</div>
+
+<div class="bar">
+<i style="width:78%"></i>
+</div>
+
+<div class="read">
+MEMORY ALLOCATION
+</div>
+
+<div class="bar">
+<i style="width:54%"></i>
+</div>
+
+<div class="read">
+NETWORK LINK
+</div>
+
+<div class="bar">
+<i style="width:91%"></i>
+</div>
+
+<div class="title">
+LIVE LOG
+</div>
+
+<div class="log">
+<b>[OK]</b> Core initialized
+</div>
+
+<div class="log">
+<b>[OK]</b> Voice interface ready
+</div>
+
+<div class="log">
+<b>[OK]</b> Gemini interface ready
+</div>
+
+<div class="log">
+<b>[OK]</b> Secure channel established
+</div>
+
+<div class="log">
+<b>[INFO]</b> Awaiting command...
+</div>
+
+</aside>
 
 </div>
 
 
 <script>
-async function sendMessage() {
 
-    const input = document.getElementById("message");
-    const messages = document.getElementById("messages");
+const $ = id => document.getElementById(id);
 
-    const text = input.value.trim();
 
-    if (!text) return;
+/* 時計・システム情報 */
 
-    messages.innerHTML +=
-        `<div class="user">YOU: ${escapeHtml(text)}</div>`;
+function tick(){
 
-    input.value = "";
+  $("clock").textContent =
+    new Date().toLocaleTimeString(
+      "ja-JP",
+      {
+        hour12:false
+      }
+    );
 
-    messages.innerHTML +=
-        `<div class="jarvis" id="loading">J.A.R.V.I.S.: 処理中です、サー...</div>`;
+  $("cpu").textContent =
+    Math.floor(20 + Math.random()*55);
 
-    messages.scrollTop = messages.scrollHeight;
+  $("mem").textContent =
+    Math.floor(35 + Math.random()*35);
 
-    try {
+  $("lat").textContent =
+    Math.floor(30 + Math.random()*80);
 
-        const response = await fetch("/chat", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                message: text
-            })
-        });
+}
 
-        const data = await response.json();
+setInterval(tick,1000);
+tick();
 
-        document.getElementById("loading").remove();
 
-        messages.innerHTML +=
-            `<div class="jarvis">J.A.R.V.I.S.: ${escapeHtml(data.reply)}</div>`;
+/* メッセージ表示 */
 
-    } catch (error) {
+function add(text,user=false){
 
-        document.getElementById("loading").remove();
+  let d=document.createElement("div");
 
-        messages.innerHTML +=
-            `<div class="jarvis">J.A.R.V.I.S.: 接続エラーです、サー。</div>`;
+  d.className =
+    "msg" + (user ? " user" : "");
+
+  let tag=document.createElement("div");
+
+  tag.className="tag";
+
+  tag.textContent =
+    user ? "YOU" : "J.A.R.V.I.S.";
+
+  let body=document.createElement("div");
+
+  body.textContent=text;
+
+  d.append(tag,body);
+
+  $("messages").appendChild(d);
+
+  $("messages").scrollTop =
+    $("messages").scrollHeight;
+}
+
+
+/* テキスト送信 */
+
+$("form").addEventListener(
+  "submit",
+  async e => {
+
+    e.preventDefault();
+
+    let input=$("message");
+
+    let text=input.value.trim();
+
+    if(!text)return;
+
+    add(text,true);
+
+    input.value="";
+
+    add("処理中です、サー……");
+
+    let loading =
+      $("messages").lastElementChild;
+
+    try{
+
+      let r=await fetch(
+        "/chat",
+        {
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:JSON.stringify({
+            message:text
+          })
+        }
+      );
+
+      let data=await r.json();
+
+      loading.remove();
+
+      add(
+        data.reply ||
+        "申し訳ありません、サー。応答を取得できませんでした。"
+      );
+
+    }catch(err){
+
+      loading.remove();
+
+      add(
+        "申し訳ありません、サー。サーバーとの通信に失敗しました。"
+      );
+
     }
 
-    messages.scrollTop = messages.scrollHeight;
-}
+  }
+);
 
 
-function escapeHtml(text) {
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
+/* =========================
+   音声入力
+========================= */
+
+const mic=$("mic");
+
+const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+let recognition=null;
+
+if(SpeechRecognition){
+
+  recognition =
+    new SpeechRecognition();
+
+  recognition.lang="ja-JP";
+
+  recognition.continuous=false;
+
+  recognition.interimResults=false;
+
+
+  recognition.onstart=()=>{
+
+    mic.textContent="🔴";
+
+    mic.classList.add("listening");
+
+    mic.title="音声入力中";
+
+  };
+
+
+  recognition.onend=()=>{
+
+    mic.textContent="🎤";
+
+    mic.classList.remove("listening");
+
+    mic.title="音声入力";
+
+  };
+
+
+  recognition.onerror=(event)=>{
+
+    mic.textContent="🎤";
+
+    mic.classList.remove("listening");
+
+    console.log(
+      "音声認識エラー:",
+      event.error
+    );
+
+  };
+
+
+  recognition.onresult=(event)=>{
+
+    const text =
+      event.results[0][0].transcript;
+
+    $("message").value=text;
+
+    /*
+      音声を文字に変換したら
+      自動的にJ.A.R.V.I.S.へ送信
+    */
+
+    $("form").requestSubmit();
+
+  };
+
+
+  mic.addEventListener(
+    "click",
+    ()=>{
+
+      try{
+
+        recognition.start();
+
+      }catch(e){
+
+        console.log(e);
+
+      }
+
+    }
+  );
+
+
+}else{
+
+  mic.addEventListener(
+    "click",
+    ()=>{
+
+      alert(
+        "このブラウザでは音声入力に対応していません。"
+      );
+
+    }
+  );
+
 }
+
 </script>
 
 </body>
