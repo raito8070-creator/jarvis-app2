@@ -4,9 +4,9 @@ from google import genai
 
 app = Flask(__name__)
 
-# ========================================
-# Gemini API 設定
-# ========================================
+# ==========================================
+# Gemini API
+# ==========================================
 
 API_KEY = os.environ.get("GEMINI_API_KEY")
 
@@ -15,29 +15,26 @@ client = None
 if API_KEY:
     try:
         client = genai.Client(api_key=API_KEY)
-        print("Gemini client: ONLINE")
     except Exception as e:
         print("Gemini client error:", repr(e))
-        client = None
-else:
-    print("GEMINI_API_KEY: NOT SET")
 
 
-# ========================================
+# ==========================================
 # J.A.R.V.I.S. 設定
-# ========================================
+# ==========================================
 
 SYSTEM_PROMPT = """
 あなたはJ.A.R.V.I.S.というAIアシスタントです。
 
 ユーザーのことを「サー」と呼んでください。
 
-【話し方】
-- 日本語で自然に回答する
-- 丁寧で冷静に話す
+話し方：
+- 丁寧
+- 冷静
 - 優秀なAI執事のように話す
+- 自然な日本語
+- 回答は分かりやすく簡潔にする
 - 必要に応じて「かしこまりました、サー。」を使う
-- 無駄に長くしない
 - 質問には具体的に答える
 - 分からないことは正直に伝える
 
@@ -45,28 +42,23 @@ SYSTEM_PROMPT = """
 """
 
 
-# ========================================
+# ==========================================
 # トップページ
-# ========================================
+# ==========================================
 
 @app.route("/")
-def home():
+def index():
     return render_template("index.html")
 
 
-# ========================================
+# ==========================================
 # AIチャット
-# ========================================
+# ==========================================
 
 @app.route("/chat", methods=["POST"])
 def chat():
 
     try:
-
-        # ------------------------------
-        # データ取得
-        # ------------------------------
-
         data = request.get_json(silent=True) or {}
 
         message = str(
@@ -75,124 +67,88 @@ def chat():
 
         history = data.get("history", [])
 
-
-        # ------------------------------
-        # メッセージ確認
-        # ------------------------------
+        # ----------------------------------
+        # 空メッセージ
+        # ----------------------------------
 
         if not message:
-
             return jsonify({
                 "reply": "ご用件を入力してください、サー。",
                 "error": False
             })
 
 
-        # ------------------------------
+        # ----------------------------------
         # APIキー確認
-        # ------------------------------
+        # ----------------------------------
 
-        if not API_KEY:
-
-            print("ERROR: GEMINI_API_KEY is not set")
+        if not API_KEY or client is None:
 
             return jsonify({
                 "reply": (
-                    "申し訳ありません、サー。\n"
+                    "申し訳ありません、サー。"
                     "Gemini APIキーが設定されていません。"
                 ),
                 "error": True
             })
 
 
-        # ------------------------------
-        # Gemini Client確認
-        # ------------------------------
-
-        if client is None:
-
-            print("ERROR: Gemini client is None")
-
-            return jsonify({
-                "reply": (
-                    "申し訳ありません、サー。\n"
-                    "Geminiクライアントを起動できませんでした。"
-                ),
-                "error": True
-            })
-
-
-        # ========================================
-        # 会話を作成
-        # ========================================
+        # ----------------------------------
+        # 会話履歴
+        # ----------------------------------
 
         conversation = SYSTEM_PROMPT
 
-        conversation += "\n\n【これまでの会話】\n"
+        conversation += "\n\nこれまでの会話:\n"
 
+        for item in history[-20:]:
 
-        if isinstance(history, list):
+            if not isinstance(item, dict):
+                continue
 
-            for item in history[-10:]:
+            role = item.get("role", "")
+            text = str(item.get("text", "")).strip()
 
-                if not isinstance(item, dict):
-                    continue
+            if not text:
+                continue
 
-                role = item.get("role", "")
+            if role == "user":
 
-                text = str(
-                    item.get("text", "")
-                ).strip()
+                conversation += (
+                    f"\nユーザー：{text}"
+                )
 
-                if not text:
-                    continue
+            elif role == "assistant":
 
-
-                if role == "user":
-
-                    conversation += (
-                        "\nユーザー："
-                        + text
-                    )
-
-
-                elif role == "assistant":
-
-                    conversation += (
-                        "\nJ.A.R.V.I.S.："
-                        + text
-                    )
+                conversation += (
+                    f"\nJ.A.R.V.I.S.：{text}"
+                )
 
 
         conversation += (
-            "\n\n【今回のユーザーの発言】\n"
+            "\n\n今回のユーザーの発言：\n"
         )
 
         conversation += message
 
 
-        # ========================================
+        # ==================================
         # Geminiへ送信
-        # ========================================
-
-        print("================================")
-        print("Gemini request:")
-        print(message)
-        print("================================")
-
+        # ==================================
 
         response = client.models.generate_content(
 
-            model="gemini-2.5-flash",
+            # 現在使用するモデル
+            model="gemini-3.7-flash",
 
             contents=conversation
 
         )
 
 
-        # ========================================
-        # AI回答取得
-        # ========================================
+        # ==================================
+        # 返答取得
+        # ==================================
 
         reply = getattr(
             response,
@@ -203,70 +159,43 @@ def chat():
 
         if not reply:
 
-            print("ERROR: Gemini returned no text")
+            reply = (
+                "申し訳ありません、サー。"
+                "回答を取得できませんでした。"
+            )
 
-            return jsonify({
-                "reply": (
-                    "申し訳ありません、サー。\n"
-                    "Geminiから回答を取得できませんでした。"
-                ),
-                "error": True
-            })
-
-
-        reply = reply.strip()
-
-
-        print("================================")
-        print("Gemini response:")
-        print(reply)
-        print("================================")
-
-
-        # ========================================
-        # 返答
-        # ========================================
 
         return jsonify({
-
-            "reply": reply,
-
+            "reply": reply.strip(),
             "error": False
-
         })
 
 
-    # ========================================
-    # エラー処理
-    # ========================================
-
     except Exception as e:
 
-        error_message = repr(e)
+        # Renderのログには詳細を残す
+        print(
+            "J.A.R.V.I.S. ERROR:",
+            repr(e)
+        )
 
-        print("================================")
-        print("J.A.R.V.I.S. ERROR:")
-        print(error_message)
-        print("================================")
-
-
+        # ユーザー画面には詳細なエラーを表示しない
         return jsonify({
 
             "reply": (
-                "申し訳ありません、サー。\n"
-                "Geminiとの通信に失敗しました。\n\n"
-                "ERROR: "
-                + error_message
+                "申し訳ありません、サー。"
+                "Geminiとの通信に失敗しました。"
+                "しばらくしてからもう一度お試しください。"
             ),
 
             "error": True
 
-        }), 500
+        })
 
 
-# ========================================
+# ==========================================
 # ヘルスチェック
-# ========================================
+# ==========================================
 
 @app.route("/health")
 def health():
@@ -282,9 +211,9 @@ def health():
     })
 
 
-# ========================================
+# ==========================================
 # 起動
-# ========================================
+# ==========================================
 
 if __name__ == "__main__":
 
@@ -296,9 +225,6 @@ if __name__ == "__main__":
     )
 
     app.run(
-
         host="0.0.0.0",
-
         port=port
-
     )
