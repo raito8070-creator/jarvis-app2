@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
 <meta charset="UTF-8">
 
 <meta
-    name="viewport"
-    content="width=device-width,
-             initial-scale=1.0,
-             maximum-scale=1.0,
-             user-scalable=no"
+name="viewport"
+content="width=device-width, initial-scale=1.0, viewport-fit=cover"
 >
 
 <title>J.A.R.V.I.S.</title>
@@ -24,8 +22,21 @@ html,
 body {
     margin: 0;
     padding: 0;
-    background: #00090b;
-    color: #dfffff;
+
+    width: 100%;
+    min-height: 100%;
+
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            #00282c 0%,
+            #001517 25%,
+            #000b0d 60%,
+            #000608 100%
+        );
+
+    color: #d9ffff;
+
     font-family:
         -apple-system,
         BlinkMacSystemFont,
@@ -36,6 +47,7 @@ body {
 
 body {
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 /* =========================
@@ -44,75 +56,124 @@ body {
 
 .header {
     text-align: center;
-    padding: 35px 20px 20px;
+
+    padding-top:
+        calc(env(safe-area-inset-top) + 18px);
+
+    padding-bottom: 15px;
 }
 
 .logo {
-    color: #5faeb1;
+    color: #5d9295;
+
     font-size: 18px;
-    letter-spacing: 10px;
-    font-weight: 300;
+
+    letter-spacing: 9px;
+
+    opacity: 0.65;
 }
 
 /* =========================
-   チャット
+   チャットエリア
 ========================= */
 
-#chat {
+.chat {
     width: 100%;
-    max-width: 900px;
-    margin: auto;
-    padding: 20px;
-    padding-bottom: 210px;
+
+    padding:
+        10px 32px 180px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 28px;
 }
 
-/* AI */
+.message {
+    position: relative;
 
-.message.ai {
-    margin-bottom: 30px;
-    padding: 30px 28px;
+    padding: 28px 38px;
+
+    max-width: 90%;
+
+    border-radius: 0;
+
+    animation: appear 0.35s ease;
+}
+
+@keyframes appear {
+
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+/* JARVIS */
+
+.jarvis {
+    align-self: flex-start;
 
     background:
         linear-gradient(
-            90deg,
-            rgba(0, 230, 240, 0.08),
-            rgba(0, 40, 45, 0.28)
+            135deg,
+            rgba(0, 45, 49, 0.65),
+            rgba(0, 22, 25, 0.75)
         );
 
-    border-left: 8px solid #14e8ed;
+    border-left:
+        9px solid #18e5e9;
 
     box-shadow:
-        0 0 25px rgba(0, 230, 240, 0.04);
+        0 0 20px rgba(0, 230, 240, 0.05);
 }
 
 /* YOU */
 
-.message.user {
-    margin: 30px 0;
-    margin-left: 12%;
+.you {
+    align-self: flex-end;
 
-    padding: 25px 28px;
+    background:
+        linear-gradient(
+            135deg,
+            #080909,
+            #101010
+        );
 
-    background: #0b0d0d;
+    border-right:
+        8px solid #ff8634;
 
-    border-right: 8px solid #ff8b2c;
+    color: #ffffff;
 }
 
 .label {
-    color: #64aeb2;
-    font-size: 17px;
+
+    font-size: 18px;
+
     letter-spacing: 8px;
-    margin-bottom: 25px;
+
+    color: #6da8aa;
+
+    margin-bottom: 24px;
 }
 
-.message.user .label {
-    color: #6faeb0;
+.you .label {
+    color: #72aeb0;
 }
 
 .text {
-    font-size: 23px;
+
+    font-size: 25px;
+
     line-height: 1.9;
-    white-space: pre-wrap;
+
     word-break: break-word;
 }
 
@@ -121,133 +182,146 @@ body {
 ========================= */
 
 .controls {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
 
-    padding: 18px 18px 28px;
+    position: fixed;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    padding:
+        15px 32px
+        calc(env(safe-area-inset-bottom) + 20px);
 
     background:
         linear-gradient(
             to top,
-            #00090b 75%,
+            #00090b 65%,
             transparent
         );
 
-    z-index: 100;
+    z-index: 50;
 }
 
-.controls-inner {
-    max-width: 900px;
-    margin: auto;
+.controls-row {
 
-    display: grid;
+    display: flex;
 
-    grid-template-columns:
-        1fr
-        82px
-        82px;
+    align-items: center;
 
-    gap: 12px;
+    gap: 18px;
 }
 
-/* 入力 */
+.input {
 
-#input {
-    width: 100%;
-    height: 82px;
+    flex: 1;
 
-    border-radius: 25px;
+    height: 72px;
 
-    border: 2px solid #008e95;
+    padding:
+        0 28px;
 
-    background: #001519;
+    border:
+        2px solid #009da3;
 
-    color: #dfffff;
+    border-radius: 24px;
 
-    padding: 0 22px;
+    outline: none;
+
+    background:
+        rgba(0, 22, 24, 0.75);
+
+    color: #ffffff;
 
     font-size: 19px;
 
-    outline: none;
+    font-weight: 400;
 }
 
-#input:focus {
-    border-color: #17edf2;
+.input::placeholder {
+    color: #9d9d9d;
+}
+
+.input:focus {
+    border-color: #25f3f5;
 
     box-shadow:
-        0 0 18px rgba(0, 240, 255, 0.18);
-}
-
-#input::placeholder {
-    color: #858f90;
+        0 0 20px
+        rgba(0, 240, 245, 0.15);
 }
 
 /* ボタン */
 
-button {
-    height: 82px;
+.button {
 
-    border-radius: 25px;
+    width: 80px;
+    height: 72px;
 
-    border: 2px solid #18edf2;
+    border:
+        2px solid #19e8ed;
 
-    background: #001519;
+    border-radius: 24px;
 
-    color: #dfffff;
+    background:
+        rgba(0, 25, 27, 0.8);
 
-    font-size: 30px;
+    color: #20eff3;
+
+    font-size: 32px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
 
     cursor: pointer;
+
+    transition: 0.2s;
 }
 
-button:active {
-    transform: scale(0.95);
+.button:active {
+
+    transform: scale(0.93);
+
+    background:
+        rgba(0, 255, 255, 0.15);
 }
 
-#micBtn.listening {
-    background: #083c40;
+.button.listening {
+
+    border-color: #ff8634;
+
+    color: #ff8634;
 
     box-shadow:
-        0 0 25px rgba(0, 240, 255, 0.5);
-
-    animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-
-    0% {
-        box-shadow:
-            0 0 5px rgba(0,240,255,.2);
-    }
-
-    50% {
-        box-shadow:
-            0 0 30px rgba(0,240,255,.8);
-    }
-
-    100% {
-        box-shadow:
-            0 0 5px rgba(0,240,255,.2);
-    }
-
+        0 0 20px
+        rgba(255, 134, 52, 0.4);
 }
 
 /* =========================
-   下部表示
+   ステータス
 ========================= */
 
 .status {
+
     text-align: center;
 
     margin-top: 25px;
 
-    color: #29777b;
+    color: #35777a;
 
-    letter-spacing: 7px;
+    font-size: 14px;
 
-    font-size: 12px;
+    letter-spacing: 5px;
+}
+
+.status.online {
+    color: #22cfd2;
+}
+
+.status.error {
+    color: #ff6c6c;
 }
 
 /* =========================
@@ -256,51 +330,31 @@ button:active {
 
 @media (max-width: 600px) {
 
-    #chat {
-        padding: 10px 12px 190px;
+    .chat {
+        padding:
+            10px 32px 190px;
     }
 
-    .message.ai {
-        padding: 25px 20px;
-        border-left-width: 7px;
-    }
+    .message {
+        max-width: 94%;
 
-    .message.user {
-        margin-left: 8%;
-        padding: 22px 20px;
-        border-right-width: 7px;
+        padding:
+            25px 30px;
     }
 
     .text {
-        font-size: 20px;
+        font-size: 23px;
+
         line-height: 1.85;
     }
 
-    .label {
-        font-size: 14px;
-        letter-spacing: 6px;
-    }
-
     .controls {
-        padding: 12px 12px 24px;
+        padding-left: 32px;
+        padding-right: 32px;
     }
 
-    .controls-inner {
-        grid-template-columns:
-            1fr
-            75px
-            75px;
-
-        gap: 8px;
-    }
-
-    #input,
-    button {
-        height: 72px;
-    }
-
-    #input {
-        font-size: 17px;
+    .button {
+        width: 74px;
     }
 
 }
@@ -308,85 +362,67 @@ button:active {
 </style>
 </head>
 
-
 <body>
 
-
-<!-- =========================
-     ヘッダー
-========================= -->
-
-<header class="header">
-
+<div class="header">
     <div class="logo">
-        J . A . R . V . I . S .
+        J · A · R · V · I · S ·
     </div>
+</div>
 
-</header>
 
+<div id="chat" class="chat">
 
-<!-- =========================
-     チャット
-========================= -->
-
-<main id="chat">
-
-    <div class="message ai">
+    <div class="message jarvis">
 
         <div class="label">
-            J . A . R . V . I . S .
+            J · A · R · V · I · S ·
         </div>
 
         <div class="text">
-かしこまりました、サー。
-
-システムは正常に起動しております。
-
-本日はどのようなご用件でしょうか？
+            こんにちは、サー。<br>
+            システムは正常に稼働しております。<br><br>
+            本日はどのようなご用件でしょうか？
         </div>
 
     </div>
 
-</main>
+</div>
 
-
-<!-- =========================
-     操作
-========================= -->
 
 <div class="controls">
 
-    <div class="controls-inner">
+    <div class="controls-row">
 
         <input
-            id="input"
+            id="messageInput"
+            class="input"
             type="text"
-            placeholder="J.A.R.V.I.S.に指示してください"
             autocomplete="off"
+            placeholder="J.A.R.V.I.S.に指示してください"
         >
 
         <button
-            id="micBtn"
+            id="micButton"
+            class="button"
             type="button"
-            title="音声入力"
+            aria-label="音声入力"
         >
             🎙️
         </button>
 
         <button
-            id="sendBtn"
+            id="sendButton"
+            class="button"
             type="button"
-            title="送信"
+            aria-label="送信"
         >
             ➤
         </button>
 
     </div>
 
-    <div
-        id="status"
-        class="status"
-    >
+    <div id="status" class="status online">
         SECURE CHANNEL　//　VOICE + TEXT INTERFACE
     </div>
 
@@ -395,186 +431,31 @@ button:active {
 
 <script>
 
-/* ========================================
+/* =========================
    要素
-======================================== */
-
-const input =
-    document.getElementById("input");
-
-const sendBtn =
-    document.getElementById("sendBtn");
-
-const micBtn =
-    document.getElementById("micBtn");
+========================= */
 
 const chat =
     document.getElementById("chat");
 
-const status =
+const input =
+    document.getElementById("messageInput");
+
+const sendButton =
+    document.getElementById("sendButton");
+
+const micButton =
+    document.getElementById("micButton");
+
+const statusText =
     document.getElementById("status");
 
 
-/* ========================================
-   会話履歴
-======================================== */
-
-let history = [];
-
-
-/* ========================================
-   音声認識
-======================================== */
-
-let recognition = null;
-
-let listening = false;
-
-
-/*
-   Safari / Chrome 対応
-*/
-
-const SpeechRecognition =
-    window.SpeechRecognition ||
-    window.webkitSpeechRecognition;
-
-
-if (SpeechRecognition) {
-
-    recognition =
-        new SpeechRecognition();
-
-    recognition.lang = "ja-JP";
-
-    recognition.continuous = false;
-
-    recognition.interimResults = false;
-
-
-    recognition.onstart = function() {
-
-        listening = true;
-
-        micBtn.classList.add("listening");
-
-        status.textContent =
-            "LISTENING // 音声を認識しています";
-
-    };
-
-
-    recognition.onresult = function(event) {
-
-        const text =
-            event.results[0][0].transcript;
-
-        input.value = text;
-
-        status.textContent =
-            "VOICE RECEIVED // 音声を受信しました";
-
-        /*
-           音声認識したら自動送信
-        */
-
-        setTimeout(() => {
-
-            sendMessage();
-
-        }, 300);
-
-    };
-
-
-    recognition.onerror = function(event) {
-
-        console.log(
-            "Speech recognition error:",
-            event.error
-        );
-
-        status.textContent =
-            "VOICE ERROR // 音声認識エラー";
-
-    };
-
-
-    recognition.onend = function() {
-
-        listening = false;
-
-        micBtn.classList.remove("listening");
-
-        setTimeout(() => {
-
-            status.textContent =
-                "SECURE CHANNEL // VOICE + TEXT INTERFACE";
-
-        }, 1500);
-
-    };
-
-} else {
-
-    micBtn.disabled = true;
-
-    status.textContent =
-        "VOICE INPUT NOT SUPPORTED";
-
-}
-
-
-/* ========================================
-   マイク
-======================================== */
-
-micBtn.addEventListener(
-    "click",
-    function() {
-
-        if (!recognition) {
-
-            alert(
-                "このブラウザでは音声入力を利用できません。"
-            );
-
-            return;
-
-        }
-
-
-        if (listening) {
-
-            recognition.stop();
-
-            return;
-
-        }
-
-
-        try {
-
-            recognition.start();
-
-        } catch (error) {
-
-            console.log(error);
-
-        }
-
-    }
-);
-
-
-/* ========================================
-   AIメッセージ追加
-======================================== */
-
-function addMessage(
-    type,
-    text
-) {
+/* =========================
+   メッセージ表示
+========================= */
+
+function addMessage(type, text) {
 
     const message =
         document.createElement("div");
@@ -582,169 +463,96 @@ function addMessage(
     message.className =
         "message " + type;
 
-
     const label =
         document.createElement("div");
 
     label.className =
         "label";
 
-
     label.textContent =
-        type === "user"
-            ? "Y O U"
-            : "J . A . R . V . I . S .";
+        type === "you"
+        ? "Y O U"
+        : "J · A · R · V · I · S ·";
 
-
-    const textElement =
+    const content =
         document.createElement("div");
 
-    textElement.className =
+    content.className =
         "text";
 
-    textElement.textContent =
+    content.textContent =
         text;
 
-
     message.appendChild(label);
-
-    message.appendChild(textElement);
+    message.appendChild(content);
 
     chat.appendChild(message);
 
-
     window.scrollTo({
-
         top: document.body.scrollHeight,
-
         behavior: "smooth"
-
     });
 
+    return message;
 }
 
 
-/* ========================================
-   音声読み上げ
-======================================== */
+/* =========================
+   読み上げ
+========================= */
 
 function speak(text) {
 
     if (!("speechSynthesis" in window)) {
-
         return;
-
     }
 
-
-    /*
-       前の音声を停止
-    */
-
-    speechSynthesis.cancel();
-
-
-    /*
-       読み上げ用テキスト
-    */
-
-    const cleanText =
-        text
-        .replace(
-            /[*_#`]/g,
-            ""
-        );
-
+    window.speechSynthesis.cancel();
 
     const utterance =
-        new SpeechSynthesisUtterance(
-            cleanText
-        );
+        new SpeechSynthesisUtterance(text);
 
+    utterance.lang = "ja-JP";
 
-    utterance.lang =
-        "ja-JP";
+    utterance.rate = 0.95;
 
-    utterance.rate =
-        0.95;
+    utterance.pitch = 0.9;
 
-    utterance.pitch =
-        0.85;
+    utterance.volume = 1.0;
 
-    utterance.volume =
-        1.0;
-
-
-    utterance.onstart =
-        function() {
-
-            status.textContent =
-                "J.A.R.V.I.S. // SPEAKING";
-
-        };
-
-
-    utterance.onend =
-        function() {
-
-            status.textContent =
-                "SECURE CHANNEL // READY";
-
-        };
-
-
-    speechSynthesis.speak(
+    window.speechSynthesis.speak(
         utterance
     );
-
 }
 
 
-/* ========================================
-   AIへ送信
-======================================== */
+/* =========================
+   Geminiへ送信
+========================= */
 
 async function sendMessage() {
 
     const message =
         input.value.trim();
 
-
     if (!message) {
-
         return;
-
     }
 
-
-    /*
-       ユーザー表示
-    */
-
     addMessage(
-        "user",
+        "you",
         message
     );
 
-
-    /*
-       入力欄をクリア
-    */
-
     input.value = "";
 
+    statusText.textContent =
+        "J.A.R.V.I.S. IS THINKING...";
 
-    /*
-       通信中
-    */
+    statusText.className =
+        "status";
 
-    status.textContent =
-        "J.A.R.V.I.S. // PROCESSING";
-
-
-    /*
-       AIへ送信
-    */
+    sendButton.disabled = true;
 
     try {
 
@@ -752,144 +560,244 @@ async function sendMessage() {
             await fetch(
                 "/chat",
                 {
-
                     method: "POST",
 
                     headers: {
-
                         "Content-Type":
                             "application/json"
-
                     },
 
                     body: JSON.stringify({
-
-                        message:
-                            message,
-
-                        history:
-                            history
-
+                        message: message
                     })
-
                 }
             );
-
 
         const data =
             await response.json();
 
+        if (!response.ok || !data.success) {
 
-        const reply =
-            data.reply ||
-            "申し訳ありません、サー。回答を取得できませんでした。";
-
-
-        /*
-           AI表示
-        */
-
-        addMessage(
-            "ai",
-            reply
-        );
-
-
-        /*
-           履歴保存
-        */
-
-        history.push({
-
-            role: "user",
-
-            text: message
-
-        });
-
-
-        history.push({
-
-            role: "assistant",
-
-            text: reply
-
-        });
-
-
-        /*
-           最大40件
-        */
-
-        if (history.length > 40) {
-
-            history =
-                history.slice(-40);
-
+            throw new Error(
+                data.error ||
+                "通信エラー"
+            );
         }
 
+        addMessage(
+            "jarvis",
+            data.response
+        );
 
-        /*
-           音声で回答
-        */
+        statusText.textContent =
+            "SECURE CHANNEL　//　VOICE + TEXT INTERFACE";
 
-        speak(reply);
+        statusText.className =
+            "status online";
 
+        // 回答を読み上げ
+        speak(data.response);
 
     } catch (error) {
 
-        console.error(
-            "CHAT ERROR:",
-            error
-        );
-
-
-        const errorMessage =
-            "申し訳ありません、サー。通信中にエラーが発生しました。";
-
+        console.error(error);
 
         addMessage(
-            "ai",
-            errorMessage
+            "jarvis",
+            "申し訳ありません、サー。現在AIとの通信に問題が発生しております。少し時間を置いて再度お試しください。"
         );
 
+        statusText.textContent =
+            "COMMUNICATION ERROR";
 
-        speak(
-            errorMessage
-        );
+        statusText.className =
+            "status error";
 
+    } finally {
+
+        sendButton.disabled = false;
+
+        input.focus();
     }
-
 }
 
 
-/* ========================================
+/* =========================
    送信ボタン
-======================================== */
+========================= */
 
-sendBtn.addEventListener(
+sendButton.addEventListener(
     "click",
     sendMessage
 );
 
 
-/* ========================================
-   Enterキー
-======================================== */
+/* =========================
+   Enter送信
+========================= */
 
 input.addEventListener(
     "keydown",
     function(event) {
 
         if (
-            event.key === "Enter"
+            event.key === "Enter" &&
+            !event.shiftKey
         ) {
 
             event.preventDefault();
 
             sendMessage();
+        }
+
+    }
+);
+
+
+/* =========================
+   音声入力
+========================= */
+
+const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+let recognition = null;
+
+let listening = false;
+
+
+if (SpeechRecognition) {
+
+    recognition =
+        new SpeechRecognition();
+
+    recognition.lang =
+        "ja-JP";
+
+    recognition.continuous =
+        false;
+
+    recognition.interimResults =
+        false;
+
+
+    recognition.onstart =
+        function() {
+
+            listening = true;
+
+            micButton.classList.add(
+                "listening"
+            );
+
+            statusText.textContent =
+                "LISTENING...";
+        };
+
+
+    recognition.onresult =
+        function(event) {
+
+            const text =
+                event.results[0][0].transcript;
+
+            input.value = text;
+
+            // 音声入力後、自動送信
+            sendMessage();
+        };
+
+
+    recognition.onerror =
+        function(event) {
+
+            console.error(
+                "Speech recognition error:",
+                event.error
+            );
+
+            statusText.textContent =
+                "VOICE INPUT ERROR";
+
+            statusText.className =
+                "status error";
+        };
+
+
+    recognition.onend =
+        function() {
+
+            listening = false;
+
+            micButton.classList.remove(
+                "listening"
+            );
+
+            if (
+                statusText.textContent ===
+                "LISTENING..."
+            ) {
+
+                statusText.textContent =
+                    "SECURE CHANNEL　//　VOICE + TEXT INTERFACE";
+
+                statusText.className =
+                    "status online";
+            }
+
+        };
+
+
+    micButton.addEventListener(
+        "click",
+        function() {
+
+            if (listening) {
+
+                recognition.stop();
+
+                return;
+            }
+
+            try {
+
+                recognition.start();
+
+            } catch (error) {
+
+                console.error(error);
+
+            }
 
         }
+    );
+
+} else {
+
+    micButton.addEventListener(
+        "click",
+        function() {
+
+            alert(
+                "このブラウザでは音声入力に対応していません。"
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================
+   初期状態
+========================= */
+
+window.addEventListener(
+    "load",
+    function() {
+
+        input.focus();
 
     }
 );
