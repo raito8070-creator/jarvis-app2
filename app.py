@@ -36,16 +36,15 @@ if API_KEY:
 SYSTEM_PROMPT = """
 あなたはJ.A.R.V.I.S.というAIアシスタントです。
 
-ユーザーのことを必ず「サー」と呼んでください。
+ユーザーのことを「サー」と呼んでください。
 
 話し方：
 - 丁寧
 - 冷静
 - 自然な日本語
 - 優秀なAI執事のように話す
-- 必要以上に長くしない
+- 無駄に長くしない
 - 質問には具体的に答える
-- 分からないことは正直に伝える
 
 重要：
 ユーザーが音声について質問していない限り、
@@ -56,20 +55,23 @@ SYSTEM_PROMPT = """
 「端末の読み上げ機能を使ってください」
 などの説明を勝手にしないでください。
 
-あなたはJ.A.R.V.I.S.として、
+あなたはJ.A.R.V.I.S.として
 ユーザーをサポートしてください。
 """
 
 
 # ==========================================
-# Geminiへ問い合わせ
+# Gemini問い合わせ
 # ==========================================
 
 def ask_gemini(message, history=None):
 
     if client is None:
 
-        print("ERROR: GEMINI_API_KEY がありません")
+        print("================================")
+        print("GEMINI ERROR")
+        print("GEMINI_API_KEY が設定されていません")
+        print("================================")
 
         return (
             "申し訳ありません、サー。"
@@ -78,13 +80,12 @@ def ask_gemini(message, history=None):
 
 
     # --------------------------------------
-    # 会話を作成
+    # 会話履歴
     # --------------------------------------
 
     conversation = ""
 
-
-    if history:
+    if isinstance(history, list):
 
         conversation += "\nこれまでの会話:\n"
 
@@ -93,8 +94,15 @@ def ask_gemini(message, history=None):
             if not isinstance(item, dict):
                 continue
 
-            role = item.get("role", "")
-            text = item.get("text", "")
+            role = item.get(
+                "role",
+                ""
+            )
+
+            text = item.get(
+                "text",
+                ""
+            )
 
             if not text:
                 continue
@@ -159,10 +167,6 @@ def ask_gemini(message, history=None):
             print("================================")
 
 
-            # ----------------------------------
-            # 回答取得
-            # ----------------------------------
-
             reply = getattr(
                 response,
                 "text",
@@ -176,10 +180,8 @@ def ask_gemini(message, history=None):
 
 
             print(
-                "WARNING: Geminiから"
-                "テキスト回答がありません"
+                "Geminiからテキスト回答がありません"
             )
-
 
             return (
                 "申し訳ありません、サー。"
@@ -192,16 +194,29 @@ def ask_gemini(message, history=None):
             error_type = type(e).__name__
             error_text = str(e)
 
+            # APIキーそのものをログに出さない
+            safe_error = error_text
 
+            if API_KEY:
+                safe_error = safe_error.replace(
+                    API_KEY,
+                    "[API_KEY_HIDDEN]"
+                )
+
+
+            print("")
             print("================================")
             print("J.A.R.V.I.S. GEMINI ERROR")
             print("TYPE:", error_type)
-            print("ERROR:", error_text)
+            print("ERROR:", safe_error)
+            print("MODEL:", MODEL)
+            print("ATTEMPT:", attempt + 1)
             print("================================")
+            print("")
 
 
             # ----------------------------------
-            # 一時的なエラーなら再試行
+            # 503 / 429
             # ----------------------------------
 
             if (
@@ -221,9 +236,9 @@ def ask_gemini(message, history=None):
                     )
 
                     print(
-                        "Retrying in",
+                        "再試行します:",
                         wait_time,
-                        "seconds..."
+                        "秒後"
                     )
 
                     time.sleep(
@@ -234,51 +249,57 @@ def ask_gemini(message, history=None):
 
 
             # ----------------------------------
-            # その他のエラー
+            # APIキー
             # ----------------------------------
 
-            if "401" in error_text:
-
-                return (
-                    "申し訳ありません、サー。"
-                    "Gemini APIキーが正しくありません。"
-                )
-
-
-            if "403" in error_text:
-
-                return (
-                    "申し訳ありません、サー。"
-                    "Gemini APIへのアクセスが"
-                    "許可されていません。"
-                )
-
-
-            if "404" in error_text:
-
-                return (
-                    "申し訳ありません、サー。"
-                    "指定したGeminiモデルが"
-                    "利用できません。"
-                )
-
-
             if (
-                "429" in error_text
+                "401" in error_text
                 or
-                "RESOURCE_EXHAUSTED"
-                in error_text
+                "UNAUTHENTICATED" in error_text
             ):
 
                 return (
                     "申し訳ありません、サー。"
-                    "Gemini APIの利用上限に"
-                    "達している可能性があります。"
+                    "Gemini APIキーを確認してください。"
                 )
 
 
             # ----------------------------------
-            # 不明なエラー
+            # 権限
+            # ----------------------------------
+
+            if (
+                "403" in error_text
+                or
+                "PERMISSION_DENIED" in error_text
+            ):
+
+                return (
+                    "申し訳ありません、サー。"
+                    "Gemini APIへのアクセス権限を"
+                    "確認してください。"
+                )
+
+
+            # ----------------------------------
+            # モデル
+            # ----------------------------------
+
+            if (
+                "404" in error_text
+                or
+                "NOT_FOUND" in error_text
+            ):
+
+                return (
+                    "申し訳ありません、サー。"
+                    "Geminiモデルへの接続に失敗しました。"
+                    "Renderのログをご確認ください。"
+                )
+
+
+            # ----------------------------------
+            # その他
             # ----------------------------------
 
             return (
@@ -288,13 +309,13 @@ def ask_gemini(message, history=None):
             )
 
 
-    # --------------------------------------
+    # ======================================
     # 3回失敗
-    # --------------------------------------
+    # ======================================
 
     return (
         "申し訳ありません、サー。"
-        "現在AIサーバーが混雑しています。"
+        "現在Geminiサーバーが混雑しています。"
         "少し時間を置いて再度お試しください。"
     )
 
@@ -312,7 +333,7 @@ def index():
 
 
 # ==========================================
-# チャット
+# チャットAPI
 # ==========================================
 
 @app.route(
@@ -322,10 +343,6 @@ def index():
 def chat():
 
     try:
-
-        # ----------------------------------
-        # JSON取得
-        # ----------------------------------
 
         data = (
             request
@@ -370,7 +387,7 @@ def chat():
 
 
         # ----------------------------------
-        # 履歴チェック
+        # 履歴
         # ----------------------------------
 
         if not isinstance(
@@ -408,10 +425,19 @@ def chat():
 
     except Exception as e:
 
+        error_text = str(e)
+
+        if API_KEY:
+            error_text = error_text.replace(
+                API_KEY,
+                "[API_KEY_HIDDEN]"
+            )
+
+
         print("================================")
         print("J.A.R.V.I.S. SERVER ERROR")
-        print(type(e).__name__)
-        print(str(e))
+        print("TYPE:", type(e).__name__)
+        print("ERROR:", error_text)
         print("================================")
 
 
@@ -465,7 +491,6 @@ if __name__ == "__main__":
             10000
         )
     )
-
 
     app.run(
 
