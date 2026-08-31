@@ -4,67 +4,68 @@ from google import genai
 
 app = Flask(__name__)
 
-# ==========================================
-# Gemini API 設定
-# ==========================================
+# =====================================
+# Gemini
+# =====================================
 
 API_KEY = os.environ.get("GEMINI_API_KEY")
 
-client = None
-
-if API_KEY:
+if not API_KEY:
+    print("WARNING: GEMINI_API_KEY is not set")
+    client = None
+else:
     try:
         client = genai.Client(api_key=API_KEY)
+        print("Gemini client initialized")
     except Exception as e:
-        print("Gemini Client Error:", repr(e))
+        print("Gemini client error:", repr(e))
         client = None
 
 
-# ==========================================
-# J.A.R.V.I.S. SYSTEM PROMPT
-# ==========================================
+MODEL = "gemini-3.7-flash"
+
+
+# =====================================
+# J.A.R.V.I.S.
+# =====================================
 
 SYSTEM_PROMPT = """
 あなたはJ.A.R.V.I.S.というAIアシスタントです。
 
 ユーザーのことを「サー」と呼んでください。
 
-【人格】
+性格：
 ・冷静
 ・丁寧
-・非常に優秀
-・落ち着いたAI執事
+・優秀
 ・親切
-・自然な日本語
+・AI執事のような話し方
 
-【話し方】
-・基本的に日本語
-・無駄に長くしない
-・質問には具体的に回答する
-・必要に応じて「かしこまりました、サー。」を使用する
-・難しい内容は分かりやすく説明する
-・分からないことは推測せず、正直に伝える
+ルール：
+・日本語で自然に回答する
+・回答は分かりやすくする
+・必要以上に長くしない
+・質問には具体的に答える
+・必要に応じて「かしこまりました、サー。」を使う
+・分からないことは正直に伝える
 
-【重要】
-ユーザーとの会話を自然につなげてください。
-
-あなたはユーザー専用のAIアシスタント
+あなたはユーザー専用AI、
 J.A.R.V.I.S.です。
 """
 
 
-# ==========================================
+# =====================================
 # トップページ
-# ==========================================
+# =====================================
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
 
-# ==========================================
-# ヘルスチェック
-# ==========================================
+# =====================================
+# Health Check
+# =====================================
 
 @app.route("/health")
 def health():
@@ -73,22 +74,18 @@ def health():
         "status": "online",
         "assistant": "J.A.R.V.I.S.",
         "api": bool(API_KEY),
-        "model": "gemini-3.6-flash"
+        "model": MODEL
     })
 
 
-# ==========================================
-# AIチャット
-# ==========================================
+# =====================================
+# Chat
+# =====================================
 
 @app.route("/chat", methods=["POST"])
 def chat():
 
     try:
-
-        # --------------------------------------
-        # JSON取得
-        # --------------------------------------
 
         data = request.get_json(silent=True) or {}
 
@@ -99,10 +96,7 @@ def chat():
         history = data.get("history", [])
 
 
-        # --------------------------------------
         # 空メッセージ
-        # --------------------------------------
-
         if not message:
 
             return jsonify({
@@ -111,10 +105,7 @@ def chat():
             })
 
 
-        # --------------------------------------
-        # APIキー確認
-        # --------------------------------------
-
+        # APIキーなし
         if not API_KEY:
 
             return jsonify({
@@ -126,10 +117,7 @@ def chat():
             })
 
 
-        # --------------------------------------
-        # Gemini Client確認
-        # --------------------------------------
-
+        # Clientなし
         if client is None:
 
             return jsonify({
@@ -141,70 +129,67 @@ def chat():
             })
 
 
-        # --------------------------------------
-        # 会話履歴作成
-        # --------------------------------------
+        # =================================
+        # 会話を作成
+        # =================================
 
         conversation = SYSTEM_PROMPT
 
-        conversation += "\n\n【これまでの会話】\n"
+        conversation += "\n\n【会話履歴】\n"
 
 
-        # 最大20件まで
-        for item in history[-20:]:
+        if isinstance(history, list):
 
-            if not isinstance(item, dict):
-                continue
+            for item in history[-20:]:
 
-            role = item.get("role", "")
-            text = str(
-                item.get("text", "")
-            ).strip()
+                if not isinstance(item, dict):
+                    continue
 
-            if not text:
-                continue
+                role = item.get("role", "")
+                text = str(
+                    item.get("text", "")
+                ).strip()
 
+                if not text:
+                    continue
 
-            if role == "user":
+                if role == "user":
 
-                conversation += (
-                    f"\nユーザー：{text}"
-                )
+                    conversation += (
+                        f"\nユーザー：{text}"
+                    )
 
-            elif role == "assistant":
+                elif role == "assistant":
 
-                conversation += (
-                    f"\nJ.A.R.V.I.S.：{text}"
-                )
+                    conversation += (
+                        f"\nJ.A.R.V.I.S.：{text}"
+                    )
 
-
-        # --------------------------------------
-        # 現在のメッセージ
-        # --------------------------------------
 
         conversation += (
-            "\n\n【今回のユーザーの発言】\n"
+            "\n\n【今回の発言】\n"
         )
 
         conversation += message
 
 
-        # --------------------------------------
-        # Gemini API
-        # --------------------------------------
+        # =================================
+        # Gemini
+        # =================================
+
+        print("Sending request to Gemini...")
 
         response = client.models.generate_content(
-
-            model="gemini-3.6-flash",
-
+            model=MODEL,
             contents=conversation
-
         )
 
+        print("Gemini response received")
 
-        # --------------------------------------
-        # 返答取得
-        # --------------------------------------
+
+        # =================================
+        # 回答
+        # =================================
 
         reply = getattr(
             response,
@@ -221,40 +206,19 @@ def chat():
             )
 
 
-        # --------------------------------------
-        # 正常終了
-        # --------------------------------------
-
         return jsonify({
-
             "reply": reply.strip(),
-
             "error": False
-
         })
 
 
-    # ==========================================
-    # エラー処理
-    # ==========================================
-
     except Exception as e:
 
-        print(
-            "================================"
-        )
-
-        print(
-            "J.A.R.V.I.S. ERROR:"
-        )
-
-        print(
-            repr(e)
-        )
-
-        print(
-            "================================"
-        )
+        # Renderのログに本当のエラーを出す
+        print("================================")
+        print("J.A.R.V.I.S. ERROR")
+        print(repr(e))
+        print("================================")
 
 
         return jsonify({
@@ -269,9 +233,9 @@ def chat():
         })
 
 
-# ==========================================
-# Render用起動
-# ==========================================
+# =====================================
+# Render
+# =====================================
 
 if __name__ == "__main__":
 
@@ -283,9 +247,6 @@ if __name__ == "__main__":
     )
 
     app.run(
-
         host="0.0.0.0",
-
         port=port
-
     )
