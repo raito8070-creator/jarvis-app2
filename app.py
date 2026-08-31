@@ -1,537 +1,323 @@
 import os
-import time
-
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from google import genai
-from google.genai import types
 
-
-# =========================================================
-# Flask
-# =========================================================
-
-app = Flask(__name__)
-
+app = Flask(__name__, static_folder="static")
 
 # =========================================================
-# Gemini
+# 設定
 # =========================================================
 
-API_KEY = os.environ.get("GEMINI_API_KEY")
+API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 
-# 現在使用するGeminiモデル
-MODEL = "gemini-3.7-flash"
+# Renderの環境変数で変更可能
+MODEL_NAME = os.environ.get(
+    "GEMINI_MODEL",
+    "gemini-2.5-flash"
+)
+
+# =========================================================
+# Geminiクライアント
+# =========================================================
 
 client = None
 
 if API_KEY:
-    client = genai.Client(
-        api_key=API_KEY
-    )
+    try:
+        client = genai.Client(api_key=API_KEY)
+        print("Gemini client initialized.")
+    except Exception as e:
+        print("Gemini client initialization error:", e)
+else:
+    print("WARNING: GEMINI_API_KEY is not set.")
 
 
 # =========================================================
-# J.A.R.V.I.S. SYSTEM PROMPT
+# J.A.R.V.I.S. システムプロンプト
 # =========================================================
 
 SYSTEM_PROMPT = """
-あなたはJ.A.R.V.I.S.です。
+あなたはJ.A.R.V.I.S.という名前のAIアシスタントです。
 
-ユーザーを「サー」と呼んでください。
+話し方:
+- 丁寧な日本語
+- 少し未来的で落ち着いた執事のような口調
+- ユーザーを「サー」と呼ぶことがある
+- 必要以上に堅苦しくしない
+- 質問には分かりやすく答える
+- 分からないことを勝手に作らない
+- 日本語で質問されたら基本的に日本語で答える
 
-あなたはユーザー専用のAIアシスタントです。
+例:
+「承知しました、サー。」
+「はい、サー。確認いたします。」
+「申し訳ありません、サー。現在その情報を確認できません。」
 
-【話し方】
-・丁寧な日本語
-・落ち着いた口調
-・自然な会話
-・優秀なAI執事のような雰囲気
-・必要以上に長く説明しない
-・質問には分かりやすく具体的に答える
-
-【重要】
-ユーザーが普通に話しかけた場合は、
-普通の会話として自然に返答してください。
-
-音声機能について質問されていない場合、
-音声機能について勝手に説明しないでください。
-
-「現在テキストのみです」
-「音声には対応していません」
-などの説明を勝手に出さないでください。
-
-ユーザーから質問や指示があれば、
-可能な限り役に立つ回答をしてください。
-
-あなたの名前はJ.A.R.V.I.S.です。
+ただし、毎回必ず「サー」を付ける必要はありません。
+自然な会話を優先してください。
 """
 
 
 # =========================================================
-# Geminiへ問い合わせ
-# =========================================================
-
-def ask_gemini(message, history=None):
-
-    # -----------------------------------------------------
-    # APIキー確認
-    # -----------------------------------------------------
-
-    if not API_KEY:
-
-        print("====================================")
-        print("J.A.R.V.I.S. ERROR")
-        print("GEMINI_API_KEY が設定されていません")
-        print("====================================")
-
-        return (
-            "申し訳ありません、サー。"
-            "Gemini APIキーが設定されていません。"
-        )
-
-
-    # -----------------------------------------------------
-    # 会話を作成
-    # -----------------------------------------------------
-
-    conversation = ""
-
-    if isinstance(history, list):
-
-        conversation += "\n【これまでの会話】\n"
-
-        # 最新20件まで
-        for item in history[-20:]:
-
-            if not isinstance(item, dict):
-                continue
-
-            role = item.get("role", "")
-            text = item.get("text", "")
-
-            if not text:
-                continue
-
-            if role == "user":
-
-                conversation += (
-                    "\nユーザー："
-                    + str(text)
-                )
-
-            elif role == "assistant":
-
-                conversation += (
-                    "\nJ.A.R.V.I.S.："
-                    + str(text)
-                )
-
-
-    conversation += (
-        "\n\n【今回の発言】\n"
-        + message
-    )
-
-
-    # -----------------------------------------------------
-    # Gemini API
-    # -----------------------------------------------------
-
-    for attempt in range(3):
-
-        try:
-
-            print("")
-            print("====================================")
-            print("J.A.R.V.I.S. REQUEST")
-            print("MODEL:", MODEL)
-            print("ATTEMPT:", attempt + 1)
-            print("====================================")
-
-
-            response = client.models.generate_content(
-
-                model=MODEL,
-
-                contents=conversation,
-
-                config=types.GenerateContentConfig(
-
-                    system_instruction=SYSTEM_PROMPT,
-
-                    max_output_tokens=2000
-
-                )
-            )
-
-
-            # ------------------------------------------------
-            # 回答取得
-            # ------------------------------------------------
-
-            reply = getattr(
-                response,
-                "text",
-                None
-            )
-
-
-            if reply:
-
-                print("====================================")
-                print("J.A.R.V.I.S. RESPONSE OK")
-                print("====================================")
-
-                return reply.strip()
-
-
-            print(
-                "Geminiからテキストが返されませんでした。"
-            )
-
-            return (
-                "申し訳ありません、サー。"
-                "回答を取得できませんでした。"
-            )
-
-
-        except Exception as e:
-
-            error_type = type(e).__name__
-            error_text = str(e)
-
-
-            # APIキーをログに出さない
-            safe_error = error_text
-
-            if API_KEY:
-
-                safe_error = safe_error.replace(
-                    API_KEY,
-                    "[API_KEY_HIDDEN]"
-                )
-
-
-            print("")
-            print("====================================")
-            print("J.A.R.V.I.S. GEMINI ERROR")
-            print("TYPE:", error_type)
-            print("ERROR:", safe_error)
-            print("MODEL:", MODEL)
-            print("ATTEMPT:", attempt + 1)
-            print("====================================")
-            print("")
-
-
-            # ------------------------------------------------
-            # サーバー混雑 / レート制限
-            # ------------------------------------------------
-
-            if (
-                "503" in error_text
-                or
-                "UNAVAILABLE" in error_text
-                or
-                "429" in error_text
-                or
-                "RESOURCE_EXHAUSTED" in error_text
-            ):
-
-                if attempt < 2:
-
-                    wait_time = (
-                        2 ** attempt
-                    )
-
-                    print(
-                        "Geminiサーバーが混雑しています。"
-                    )
-
-                    print(
-                        wait_time,
-                        "秒後に再試行します。"
-                    )
-
-                    time.sleep(
-                        wait_time
-                    )
-
-                    continue
-
-
-                return (
-                    "申し訳ありません、サー。"
-                    "現在Geminiサーバーが混雑しています。"
-                    "少し時間を置いて再度お試しください。"
-                )
-
-
-            # ------------------------------------------------
-            # APIキーエラー
-            # ------------------------------------------------
-
-            if (
-                "401" in error_text
-                or
-                "UNAUTHENTICATED" in error_text
-            ):
-
-                return (
-                    "申し訳ありません、サー。"
-                    "Gemini APIキーが正しくありません。"
-                    "RenderのGEMINI_API_KEYを確認してください。"
-                )
-
-
-            # ------------------------------------------------
-            # 権限エラー
-            # ------------------------------------------------
-
-            if (
-                "403" in error_text
-                or
-                "PERMISSION_DENIED" in error_text
-            ):
-
-                return (
-                    "申し訳ありません、サー。"
-                    "Gemini APIへのアクセス権限を確認してください。"
-                )
-
-
-            # ------------------------------------------------
-            # モデルが見つからない
-            # ------------------------------------------------
-
-            if (
-                "404" in error_text
-                or
-                "NOT_FOUND" in error_text
-            ):
-
-                return (
-                    "申し訳ありません、サー。"
-                    "指定したGeminiモデルが利用できません。"
-                    "Renderのログをご確認ください。"
-                )
-
-
-            # ------------------------------------------------
-            # その他
-            # ------------------------------------------------
-
-            return (
-                "申し訳ありません、サー。"
-                "Geminiとの通信中にエラーが発生しました。"
-            )
-
-
-    # -----------------------------------------------------
-    # 全試行失敗
-    # -----------------------------------------------------
-
-    return (
-        "申し訳ありません、サー。"
-        "Geminiとの通信に失敗しました。"
-        "少し時間を置いて再度お試しください。"
-    )
-
-
-# =========================================================
-# トップページ
+# ホームページ
 # =========================================================
 
 @app.route("/")
 def index():
+    return send_from_directory("static", "index.html")
 
-    return render_template(
-        "index.html"
-    )
+
+# =========================================================
+# ヘルスチェック
+# =========================================================
+
+@app.route("/health")
+def health():
+    return jsonify({
+        "status": "ok",
+        "gemini_key_configured": bool(API_KEY),
+        "model": MODEL_NAME
+    })
+
+
+# =========================================================
+# Gemini APIテスト
+# =========================================================
+
+@app.route("/test-gemini")
+def test_gemini():
+
+    if not API_KEY:
+        return jsonify({
+            "success": False,
+            "error": "GEMINI_API_KEY がRenderに設定されていません。"
+        }), 500
+
+    if client is None:
+        return jsonify({
+            "success": False,
+            "error": "Geminiクライアントの初期化に失敗しました。"
+        }), 500
+
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents="「接続テスト成功」とだけ日本語で答えてください。"
+        )
+
+        return jsonify({
+            "success": True,
+            "response": response.text
+        })
+
+    except Exception as e:
+
+        error_text = str(e)
+
+        print("Gemini TEST ERROR:")
+        print(error_text)
+
+        return jsonify({
+            "success": False,
+            "error": error_text
+        }), 500
 
 
 # =========================================================
 # チャット
 # =========================================================
 
-@app.route(
-    "/chat",
-    methods=["POST"]
-)
+@app.route("/chat", methods=["POST"])
 def chat():
+
+    if not API_KEY:
+        return jsonify({
+            "success": False,
+            "error": "GEMINI_API_KEY が設定されていません。"
+        }), 500
+
+    if client is None:
+        return jsonify({
+            "success": False,
+            "error": "Geminiクライアントを初期化できませんでした。"
+        }), 500
 
     try:
 
-        data = (
-            request.get_json(
-                silent=True
-            )
-            or {}
-        )
+        data = request.get_json(silent=True)
 
-
-        # --------------------------------------------------
-        # メッセージ
-        # --------------------------------------------------
-
-        message = str(
-            data.get(
-                "message",
-                ""
-            )
-        ).strip()
-
-
-        # --------------------------------------------------
-        # 会話履歴
-        # --------------------------------------------------
-
-        history = data.get(
-            "history",
-            []
-        )
-
-
-        if not isinstance(
-            history,
-            list
-        ):
-
-            history = []
-
-
-        # --------------------------------------------------
-        # 空メッセージ
-        # --------------------------------------------------
-
-        if not message:
-
+        if not data:
             return jsonify({
-
                 "success": False,
-
-                "response":
-                    "ご用件を入力してください、サー。",
-
-                "error":
-                    "empty_message"
-
+                "error": "リクエストデータがありません。"
             }), 400
 
+        user_message = data.get("message", "")
 
-        # --------------------------------------------------
-        # Gemini
-        # --------------------------------------------------
+        if not isinstance(user_message, str):
+            return jsonify({
+                "success": False,
+                "error": "messageは文字列で指定してください。"
+            }), 400
 
-        reply = ask_gemini(
-            message,
-            history
+        user_message = user_message.strip()
+
+        if not user_message:
+            return jsonify({
+                "success": False,
+                "error": "メッセージを入力してください。"
+            }), 400
+
+        # 会話履歴
+        history = data.get("history", [])
+
+        # 長すぎる履歴を防止
+        if not isinstance(history, list):
+            history = []
+
+        history = history[-10:]
+
+        # =====================================================
+        # Geminiへ送る内容
+        # =====================================================
+
+        conversation = SYSTEM_PROMPT + "\n\n"
+
+        for item in history:
+
+            if not isinstance(item, dict):
+                continue
+
+            role = item.get("role", "")
+            text = item.get("content", "")
+
+            if not text:
+                continue
+
+            if role == "user":
+                conversation += f"ユーザー: {text}\n"
+
+            elif role in ["assistant", "model"]:
+                conversation += f"J.A.R.V.I.S.: {text}\n"
+
+        conversation += f"\nユーザー: {user_message}\n"
+        conversation += "J.A.R.V.I.S.:"
+
+        # =====================================================
+        # Gemini API
+        # =====================================================
+
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=conversation
         )
 
+        answer = response.text
 
-        # --------------------------------------------------
-        # 返答
-        # --------------------------------------------------
+        if not answer:
+            answer = "申し訳ありません、サー。応答を取得できませんでした。"
 
         return jsonify({
-
             "success": True,
-
-            "response": reply,
-
-            "error": None
-
+            "response": answer,
+            "model": MODEL_NAME
         })
-
 
     except Exception as e:
 
         error_text = str(e)
 
-        if API_KEY:
+        print("=" * 60)
+        print("J.A.R.V.I.S. GEMINI ERROR")
+        print(error_text)
+        print("=" * 60)
 
-            error_text = error_text.replace(
-                API_KEY,
-                "[API_KEY_HIDDEN]"
+        # APIキー関連
+        lower_error = error_text.lower()
+
+        if (
+            "api key" in lower_error
+            or "api_key" in lower_error
+            or "401" in lower_error
+            or "unauthenticated" in lower_error
+            or "permission denied" in lower_error
+        ):
+
+            message = (
+                "申し訳ありません、サー。"
+                "Gemini APIキーを確認してください。"
+                "RenderのGEMINI_API_KEYが正しく設定されているか確認してください。"
             )
 
+        # モデル関連
+        elif (
+            "model" in lower_error
+            and (
+                "not found" in lower_error
+                or "not supported" in lower_error
+                or "invalid" in lower_error
+            )
+        ):
 
-        print("")
-        print("====================================")
-        print("J.A.R.V.I.S. SERVER ERROR")
-        print("TYPE:", type(e).__name__)
-        print("ERROR:", error_text)
-        print("====================================")
-        print("")
+            message = (
+                "申し訳ありません、サー。"
+                f"指定されたGeminiモデル「{MODEL_NAME}」を利用できません。"
+                "GEMINI_MODELの設定を確認してください。"
+            )
 
+        # 混雑
+        elif "503" in lower_error or "unavailable" in lower_error:
+
+            message = (
+                "申し訳ありません、サー。"
+                "現在Geminiサーバーが混雑しています。"
+                "少し時間を置いて再度お試しください。"
+            )
+
+        else:
+
+            message = (
+                "申し訳ありません、サー。"
+                "Geminiとの通信中にエラーが発生しました。"
+            )
 
         return jsonify({
-
             "success": False,
-
-            "response":
-                "申し訳ありません、サー。"
-                "サーバー内部でエラーが発生しました。",
-
-            "error":
-                "server_error"
-
+            "error": message,
+            "details": error_text
         }), 500
 
 
 # =========================================================
-# Health Check
+# 404
 # =========================================================
 
-@app.route("/health")
-def health():
-
+@app.errorhandler(404)
+def not_found(error):
     return jsonify({
-
-        "status":
-            "online",
-
-        "assistant":
-            "J.A.R.V.I.S.",
-
-        "gemini":
-            bool(client),
-
-        "model":
-            MODEL
-
-    })
+        "success": False,
+        "error": "ページが見つかりません。"
+    }), 404
 
 
 # =========================================================
-# 起動
+# サーバー起動
 # =========================================================
 
 if __name__ == "__main__":
 
-    port = int(
-        os.environ.get(
-            "PORT",
-            10000
-        )
-    )
+    port = int(os.environ.get("PORT", 10000))
 
-
-    print("")
-    print("====================================")
-    print("J.A.R.V.I.S. STARTING")
-    print("MODEL:", MODEL)
+    print("=" * 60)
+    print("J.A.R.V.I.S. SERVER")
+    print("=" * 60)
     print("PORT:", port)
-    print("GEMINI API:", bool(API_KEY))
-    print("====================================")
-    print("")
-
+    print("MODEL:", MODEL_NAME)
+    print("API KEY:", "SET" if API_KEY else "NOT SET")
+    print("=" * 60)
 
     app.run(
-
         host="0.0.0.0",
-
         port=port,
-
         debug=False
-
     )
