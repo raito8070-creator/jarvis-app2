@@ -1,208 +1,182 @@
 import os
+import base64
 import requests
-
 from flask import Flask, request, jsonify, render_template
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024
 
-# ==============================
-# Gemini設定
-# ==============================
-
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-
-# 現在利用可能なGeminiモデル
-MODEL = "gemini-3.7-flash"
-
-GEMINI_URL = (
-    f"https://generativelanguage.googleapis.com/"
-    f"v1beta/models/{MODEL}:generateContent"
-)
-
-# ==============================
-# J.A.R.V.I.S.設定
-# ==============================
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash").strip()
 
 SYSTEM_PROMPT = """
-あなたはJ.A.R.V.I.S.という名前のAIアシスタントです。
-
-ユーザーには丁寧な日本語で対応してください。
-
-基本的な話し方:
-- 丁寧
-- 冷静
-- 少し未来的
-- 執事のような口調
-- 必要に応じて「サー」と呼ぶ
-- ただし不自然に毎回「サー」を付けない
-
-回答は分かりやすくしてください。
-
-ユーザーから質問された場合は、
-可能な限り正確に答えてください。
-
-ユーザーが「こんにちは」と言った場合は、
-自然に挨拶してください。
-
-あなたはJ.A.R.V.I.S.です。
+あなたはJ.A.R.V.I.S.という名前の個人用AIアシスタントです。
+落ち着いた未来的な執事のような日本語で話してください。
+必要なときだけユーザーを「サー」と呼んでください。
+回答は正確で分かりやすく、必要以上に長くしないでください。
+最新情報が必要な質問では検索ツールを利用してください。
+画像やPDFが渡された場合は、その内容を読み取って質問に答えてください。
+危険・違法・年齢制限のあることについては安全を優先してください。
 """
 
-# ==============================
-# ホーム画面
-# ==============================
+def gemini_url():
+    return (
+        "https://generativelanguage.googleapis.com/v1beta/"
+        f"models/{GEMINI_MODEL}:generateContent"
+    )
+
+def call_gemini(contents, use_search=False):
+    payload = {
+        "systemInstruction": {"parts": [{"text": SYSTEM_PROMPT}]},
+        "contents": contents,
+    }
+    if use_search:
+        payload["tools"] = [{"google_search": {}}]
+
+    r = requests.post(
+        gemini_url(),
+        headers={
+            "Content-Type": "application/json",
+            "x-goog-api-key": GEMINI_API_KEY,
+        },
+        json=payload,
+        timeout=90,
+    )
+    try:
+        data = r.json()
+    except ValueError:
+        data = {"raw": r.text}
+
+    if r.status_code != 200:
+        print("Gemini:", r.status_code, data)
+        return None, {
+            "success": False,
+            "error": "Gemini APIでエラーが発生しました。",
+            "status": r.status_code,
+            "details": data,
+        }
+
+    candidates = data.get("candidates", [])
+    if not candidates:
+        return None, {"success": False, "error": "Geminiから回答が返りませんでした。"}
+
+    parts = candidates[0].get("content", {}).get("parts", [])
+    reply = "".join(p.get("text", "") for p in parts if isinstance(p, dict)).strip()
+    if not reply:
+        return None, {"success": False, "error": "Geminiの回答本文が空でした。"}
+
+    return reply, None
 
 @app.route("/")
 def index():
     return render_template("index.html")
-
-
-# ==============================
-# ヘルスチェック
-# ==============================
 
 @app.route("/health")
 def health():
     return jsonify({
         "success": True,
         "status": "online",
-        "model": MODEL,
-        "api_key": bool(GEMINI_API_KEY)
+        "model": GEMINI_MODEL,
+        "api_key_set": bool(GEMINI_API_KEY),
     })
-
-
-# ==============================
-# チャット
-# ==============================
 
 @app.route("/chat", methods=["POST"])
 def chat():
-
-    # APIキー確認
     if not GEMINI_API_KEY:
-        return jsonify({
-            "success": False,
-            "error": "GEMINI_API_KEYがRenderに設定されていません。"
-        }), 500
+        return jsonify({"success": False, "error": "RenderにGEMINI_API_KEYが設定されていません。"}), 500
 
-    try:
-        data = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True) or {}
+    message = str(data.get("message", "")).strip()
+    use_search = bool(data.get("use_search", False))
+    history = data.get("history", [])
 
-        user_message = data.get("message", "")
+    if not message:
+        return jsonify({"success": False, "error": "メッセージが空です。"}), 400
 
-        if not user_message:
-            return jsonify({
-                "success": False,
-                "error": "メッセージが空です。"
-            }), 400
+    contents = []
+    if isinstance(history, list):
+        for item in history[-12:]:
+            role = "model" if item.get("role") == "assistant" else "user"
+            text = str(item.get("text", "")).strip()
+            if text:
+                contents.append({"role": role, "parts": [{"text": text}]})
+    contents.append({"role": "user", "parts": [{"text": message}]})
 
-        # Geminiへ送信する内容
-        prompt = SYSTEM_PROMPT + "\n\nユーザー:\n" + user_message
+    reply, err = call_gemini(contents, use_search=use_search)
+    if err:
+        return jsonify(err), 502
+    return jsonify({"success": True, "reply": reply})
 
-        payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {
-                            "text": prompt
-                        }
-                    ]
-                }
-            ],
-            "generationConfig": {
-                "temperature": 0.7,
-                "maxOutputTokens": 2048
-            }
-        }
+@app.route("/analyze", methods=["POST"])
+def analyze():
+    if not GEMINI_API_KEY:
+        return jsonify({"success": False, "error": "GEMINI_API_KEYが設定されていません。"}), 500
 
-        # ==============================
-        # Gemini APIへ送信
-        # ==============================
-        response = requests.post(
-            GEMINI_URL,
-            headers={
-                "Content-Type": "application/json",
-                "x-goog-api-key": GEMINI_API_KEY
-            },
-            json=payload,
-            timeout=60
-        )
+    image = request.files.get("image")
+    prompt = request.form.get("prompt", "この画像を詳しく説明してください。").strip()
+    if not image:
+        return jsonify({"success": False, "error": "画像がありません。"}), 400
 
-        # APIエラー
-        if response.status_code != 200:
+    mime = image.mimetype or "image/jpeg"
+    raw = image.read()
+    if not raw:
+        return jsonify({"success": False, "error": "画像が空です。"}), 400
 
-            try:
-                error_data = response.json()
-            except Exception:
-                error_data = response.text
+    contents = [{
+        "role": "user",
+        "parts": [
+            {"text": prompt},
+            {"inline_data": {"mime_type": mime, "data": base64.b64encode(raw).decode("ascii")}},
+        ],
+    }]
+    reply, err = call_gemini(contents)
+    if err:
+        return jsonify(err), 502
+    return jsonify({"success": True, "reply": reply})
 
-            print("Gemini API ERROR:")
-            print(error_data)
+@app.route("/document", methods=["POST"])
+def document():
+    if not GEMINI_API_KEY:
+        return jsonify({"success": False, "error": "GEMINI_API_KEYが設定されていません。"}), 500
 
-            return jsonify({
-                "success": False,
-                "error": "Gemini APIでエラーが発生しました。",
-                "details": error_data
-            }), response.status_code
+    doc = request.files.get("file")
+    prompt = request.form.get("prompt", "このファイルの重要点を日本語で要約してください。").strip()
+    if not doc:
+        return jsonify({"success": False, "error": "ファイルがありません。"}), 400
 
-        result = response.json()
+    filename = secure_filename(doc.filename or "file")
+    ext = os.path.splitext(filename)[1].lower()
+    raw = doc.read()
 
-        # ==============================
-        # Geminiの回答を取得
-        # ==============================
-
+    # PDF: extract text server-side.
+    if ext == ".pdf":
         try:
-            reply = result["candidates"][0]["content"]["parts"][0]["text"]
-        except (KeyError, IndexError, TypeError):
+            from pypdf import PdfReader
+            from io import BytesIO
+            reader = PdfReader(BytesIO(raw))
+            text = "\n".join((p.extract_text() or "") for p in reader.pages)
+            text = text[:60000]
+        except Exception as e:
+            return jsonify({"success": False, "error": "PDFの読み取りに失敗しました。", "details": str(e)}), 400
+    else:
+        try:
+            text = raw.decode("utf-8", errors="replace")[:60000]
+        except Exception:
+            text = ""
 
-            print("予期しないGeminiレスポンス:")
-            print(result)
+    if not text.strip():
+        return jsonify({"success": False, "error": "読み取れる文字が見つかりませんでした。"}), 400
 
-            return jsonify({
-                "success": False,
-                "error": "Geminiから正常な回答を取得できませんでした。",
-                "details": result
-            }), 500
-
-        return jsonify({
-            "success": True,
-            "reply": reply
-        })
-
-    except requests.exceptions.Timeout:
-
-        return jsonify({
-            "success": False,
-            "error": "Geminiとの通信がタイムアウトしました。"
-        }), 504
-
-    except requests.exceptions.RequestException as e:
-
-        print("通信エラー:", e)
-
-        return jsonify({
-            "success": False,
-            "error": "Geminiとの通信に失敗しました。"
-        }), 500
-
-    except Exception as e:
-
-        print("予期しないエラー:", e)
-
-        return jsonify({
-            "success": False,
-            "error": "サーバー内部でエラーが発生しました。"
-        }), 500
-
-
-# ==============================
-# Render起動
-# ==============================
+    contents = [{
+        "role": "user",
+        "parts": [{"text": f"{prompt}\n\nファイル名: {filename}\n\n--- ファイル内容 ---\n{text}"}],
+    }]
+    reply, err = call_gemini(contents)
+    if err:
+        return jsonify(err), 502
+    return jsonify({"success": True, "reply": reply, "filename": filename})
 
 if __name__ == "__main__":
-
-    port = int(os.environ.get("PORT", 10000))
-
-    app.run(
-        host="0.0.0.0",
-        port=port
-    )
+    port = int(os.getenv("PORT", "10000"))
+    app.run(host="0.0.0.0", port=port)
