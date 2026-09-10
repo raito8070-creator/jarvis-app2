@@ -1,808 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
-
 <head>
-<meta charset="UTF-8">
-
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0, viewport-fit=cover"
->
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>J.A.R.V.I.S.</title>
-
 <style>
-
-* {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-}
-
-html,
-body {
-    margin: 0;
-    padding: 0;
-
-    width: 100%;
-    min-height: 100%;
-
-    background:
-        radial-gradient(
-            circle at 50% 0%,
-            #00282c 0%,
-            #001517 25%,
-            #000b0d 60%,
-            #000608 100%
-        );
-
-    color: #d9ffff;
-
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Helvetica Neue",
-        Arial,
-        sans-serif;
-}
-
-body {
-    min-height: 100vh;
-    overflow-x: hidden;
-}
-
-/* =========================
-   ヘッダー
-========================= */
-
-.header {
-    text-align: center;
-
-    padding-top:
-        calc(env(safe-area-inset-top) + 18px);
-
-    padding-bottom: 15px;
-}
-
-.logo {
-    color: #5d9295;
-
-    font-size: 18px;
-
-    letter-spacing: 9px;
-
-    opacity: 0.65;
-}
-
-/* =========================
-   チャットエリア
-========================= */
-
-.chat {
-    width: 100%;
-
-    padding:
-        10px 32px 180px;
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 28px;
-}
-
-.message {
-    position: relative;
-
-    padding: 28px 38px;
-
-    max-width: 90%;
-
-    border-radius: 0;
-
-    animation: appear 0.35s ease;
-}
-
-@keyframes appear {
-
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-}
-
-/* JARVIS */
-
-.jarvis {
-    align-self: flex-start;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(0, 45, 49, 0.65),
-            rgba(0, 22, 25, 0.75)
-        );
-
-    border-left:
-        9px solid #18e5e9;
-
-    box-shadow:
-        0 0 20px rgba(0, 230, 240, 0.05);
-}
-
-/* YOU */
-
-.you {
-    align-self: flex-end;
-
-    background:
-        linear-gradient(
-            135deg,
-            #080909,
-            #101010
-        );
-
-    border-right:
-        8px solid #ff8634;
-
-    color: #ffffff;
-}
-
-.label {
-
-    font-size: 18px;
-
-    letter-spacing: 8px;
-
-    color: #6da8aa;
-
-    margin-bottom: 24px;
-}
-
-.you .label {
-    color: #72aeb0;
-}
-
-.text {
-
-    font-size: 25px;
-
-    line-height: 1.9;
-
-    word-break: break-word;
-}
-
-/* =========================
-   入力エリア
-========================= */
-
-.controls {
-
-    position: fixed;
-
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    padding:
-        15px 32px
-        calc(env(safe-area-inset-bottom) + 20px);
-
-    background:
-        linear-gradient(
-            to top,
-            #00090b 65%,
-            transparent
-        );
-
-    z-index: 50;
-}
-
-.controls-row {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 18px;
-}
-
-.input {
-
-    flex: 1;
-
-    height: 72px;
-
-    padding:
-        0 28px;
-
-    border:
-        2px solid #009da3;
-
-    border-radius: 24px;
-
-    outline: none;
-
-    background:
-        rgba(0, 22, 24, 0.75);
-
-    color: #ffffff;
-
-    font-size: 19px;
-
-    font-weight: 400;
-}
-
-.input::placeholder {
-    color: #9d9d9d;
-}
-
-.input:focus {
-    border-color: #25f3f5;
-
-    box-shadow:
-        0 0 20px
-        rgba(0, 240, 245, 0.15);
-}
-
-/* ボタン */
-
-.button {
-
-    width: 80px;
-    height: 72px;
-
-    border:
-        2px solid #19e8ed;
-
-    border-radius: 24px;
-
-    background:
-        rgba(0, 25, 27, 0.8);
-
-    color: #20eff3;
-
-    font-size: 32px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-}
-
-.button:active {
-
-    transform: scale(0.93);
-
-    background:
-        rgba(0, 255, 255, 0.15);
-}
-
-.button.listening {
-
-    border-color: #ff8634;
-
-    color: #ff8634;
-
-    box-shadow:
-        0 0 20px
-        rgba(255, 134, 52, 0.4);
-}
-
-/* =========================
-   ステータス
-========================= */
-
-.status {
-
-    text-align: center;
-
-    margin-top: 25px;
-
-    color: #35777a;
-
-    font-size: 14px;
-
-    letter-spacing: 5px;
-}
-
-.status.online {
-    color: #22cfd2;
-}
-
-.status.error {
-    color: #ff6c6c;
-}
-
-/* =========================
-   スマホ
-========================= */
-
-@media (max-width: 600px) {
-
-    .chat {
-        padding:
-            10px 32px 190px;
-    }
-
-    .message {
-        max-width: 94%;
-
-        padding:
-            25px 30px;
-    }
-
-    .text {
-        font-size: 23px;
-
-        line-height: 1.85;
-    }
-
-    .controls {
-        padding-left: 32px;
-        padding-right: 32px;
-    }
-
-    .button {
-        width: 74px;
-    }
-
-}
-
+:root{--bg:#03070d;--panel:rgba(7,18,30,.82);--line:#1b86a8;--cyan:#62eaff;--text:#eafcff;--muted:#79a9b8}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 50% 0,#0b2638 0,#03070d 48%,#010308 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+header{padding:18px 18px 8px;display:flex;justify-content:space-between;align-items:center}.brand{font-weight:800;letter-spacing:3px}.status{font-size:12px;color:var(--cyan)} 
+main{max-width:900px;margin:auto;padding:8px 14px 150px}.orb{width:110px;height:110px;border:1px solid #2ac9ee;border-radius:50%;margin:14px auto 22px;box-shadow:0 0 25px #0b9cc7, inset 0 0 25px #0b9cc7;display:grid;place-items:center;position:relative}.orb:before,.orb:after{content:"";position:absolute;border:1px solid #1e6681;border-radius:50%}.orb:before{inset:13px}.orb:after{inset:27px}.core{width:15px;height:15px;background:var(--cyan);border-radius:50%;box-shadow:0 0 25px 8px #1bbfe8}
+#chat{display:flex;flex-direction:column;gap:12px}.msg{max-width:88%;padding:12px 14px;border:1px solid #174e62;border-radius:15px;background:var(--panel);white-space:pre-wrap;line-height:1.55}.user{align-self:flex-end;border-color:#286f86}.ai{align-self:flex-start}
+.toolbar{position:fixed;bottom:76px;left:0;right:0;display:flex;gap:8px;justify-content:center;z-index:4}.tool{background:#081521;border:1px solid #23677e;color:#bceffc;border-radius:12px;padding:9px 11px}.tool.active{border-color:var(--cyan);box-shadow:0 0 12px #0b7995}
+.composer{position:fixed;bottom:0;left:0;right:0;background:rgba(2,8,14,.96);border-top:1px solid #123e4d;padding:10px;display:flex;gap:8px;z-index:5;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+textarea{flex:1;min-height:45px;max-height:120px;resize:none;background:#07131d;color:white;border:1px solid #22546a;border-radius:13px;padding:12px;font-size:16px}.btn{border:1px solid #267a94;background:#09202b;color:#c8f7ff;border-radius:13px;padding:0 14px;font-size:20px}.btn:active{transform:scale(.96)}
+input[type=file]{display:none}.hint{text-align:center;color:var(--muted);font-size:11px;margin-top:15px}
+#drop{display:none;position:fixed;inset:10%;background:#071522ee;border:1px dashed var(--cyan);border-radius:20px;z-index:20;place-items:center;text-align:center;padding:20px}
 </style>
 </head>
-
 <body>
-
-<div class="header">
-    <div class="logo">
-        J · A · R · V · I · S ·
-    </div>
+<header><div class="brand">J.A.R.V.I.S.</div><div class="status" id="status">● ONLINE</div></header>
+<main>
+<div class="orb"><div class="core"></div></div>
+<div id="chat"></div>
+<div class="hint">音声・検索・画像・PDF・履歴・コマンド対応</div>
+</main>
+<div class="toolbar">
+<button class="tool active" id="searchBtn">🌐検索</button>
+<label class="tool">📷画像<input id="imageInput" type="file" accept="image/*"></label>
+<label class="tool">📄PDF<input id="fileInput" type="file" accept=".pdf,.txt,.md,.csv"></label>
+<button class="tool" id="clearBtn">🧹履歴</button>
 </div>
-
-
-<div id="chat" class="chat">
-
-    <div class="message jarvis">
-
-        <div class="label">
-            J · A · R · V · I · S ·
-        </div>
-
-        <div class="text">
-            こんにちは、サー。<br>
-            システムは正常に稼働しております。<br><br>
-            本日はどのようなご用件でしょうか？
-        </div>
-
-    </div>
-
+<div class="composer">
+<button class="btn" id="micBtn">🎙️</button>
+<textarea id="input" placeholder="サー、何をご命令ですか？"></textarea>
+<button class="btn" id="sendBtn">➤</button>
 </div>
-
-
-<div class="controls">
-
-    <div class="controls-row">
-
-        <input
-            id="messageInput"
-            class="input"
-            type="text"
-            autocomplete="off"
-            placeholder="J.A.R.V.I.S.に指示してください"
-        >
-
-        <button
-            id="micButton"
-            class="button"
-            type="button"
-            aria-label="音声入力"
-        >
-            🎙️
-        </button>
-
-        <button
-            id="sendButton"
-            class="button"
-            type="button"
-            aria-label="送信"
-        >
-            ➤
-        </button>
-
-    </div>
-
-    <div id="status" class="status online">
-        SECURE CHANNEL　//　VOICE + TEXT INTERFACE
-    </div>
-
-</div>
-
+<div id="drop"><div>📷 画像をここで選択してください</div></div>
 
 <script>
+const chat=document.getElementById('chat'), input=document.getElementById('input'), statusEl=document.getElementById('status');
+const searchBtn=document.getElementById('searchBtn'), micBtn=document.getElementById('micBtn');
+let useSearch=true;
+let history=JSON.parse(localStorage.getItem('jarvis_history')||'[]');
 
-/* =========================
-   要素
-========================= */
+function add(role,text,save=true){
+  const d=document.createElement('div'); d.className='msg '+(role==='user'?'user':'ai'); d.textContent=text; chat.appendChild(d);
+  window.scrollTo(0,document.body.scrollHeight);
+  if(save){history.push({role,text}); history=history.slice(-30); localStorage.setItem('jarvis_history',JSON.stringify(history));}
+}
+function speak(text){ if('speechSynthesis' in window){speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.rate=.95;u.pitch=.95;speechSynthesis.speak(u)}}
+function setBusy(v){statusEl.textContent=v?'◌ THINKING...':'● ONLINE'}
 
-const chat =
-    document.getElementById("chat");
+async function send(){
+  const message=input.value.trim(); if(!message)return;
+  input.value=''; add('user',message); setBusy(true);
+  try{
+    const r=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,use_search,history:history.slice(-12,-1)})});
+    const d=await r.json(); if(!d.success) throw new Error(d.error||'通信エラー');
+    add('assistant',d.reply); speak(d.reply);
+  }catch(e){add('assistant','申し訳ありません、サー。\n'+e.message)}
+  finally{setBusy(false)}
+}
+document.getElementById('sendBtn').onclick=send;
+input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
 
-const input =
-    document.getElementById("messageInput");
+searchBtn.onclick=()=>{useSearch=!useSearch;searchBtn.classList.toggle('active',useSearch);searchBtn.textContent=useSearch?'🌐検索ON':'🌐検索OFF'};
 
-const sendButton =
-    document.getElementById("sendButton");
+document.getElementById('clearBtn').onclick=()=>{history=[];localStorage.removeItem('jarvis_history');chat.innerHTML='';add('assistant','履歴を消去しました、サー。');};
 
-const micButton =
-    document.getElementById("micButton");
+async function analyzeImage(file){
+  if(!file)return; setBusy(true); add('user','📷 画像を解析してください');
+  const fd=new FormData();fd.append('image',file);fd.append('prompt',input.value.trim()||'この画像を詳しく説明してください。');input.value='';
+  try{const r=await fetch('/analyze',{method:'POST',body:fd});const d=await r.json();if(!d.success)throw Error(d.error||'画像解析エラー');add('assistant',d.reply);speak(d.reply)}catch(e){add('assistant','画像解析に失敗しました。\n'+e.message)}finally{setBusy(false)}
+}
+document.getElementById('imageInput').onchange=e=>analyzeImage(e.target.files[0]);
 
-const statusText =
-    document.getElementById("status");
+document.getElementById('fileInput').onchange=async e=>{
+ const file=e.target.files[0];if(!file)return;setBusy(true);add('user','📄 '+file.name+' を解析してください');
+ const fd=new FormData();fd.append('file',file);fd.append('prompt',input.value.trim()||'このファイルの重要点を日本語で要約してください。');input.value='';
+ try{const r=await fetch('/document',{method:'POST',body:fd});const d=await r.json();if(!d.success)throw Error(d.error||'ファイル解析エラー');add('assistant',d.reply);speak(d.reply)}catch(e){add('assistant','ファイル解析に失敗しました。\n'+e.message)}finally{setBusy(false)}
+};
 
-
-/* =========================
-   メッセージ表示
-========================= */
-
-function addMessage(type, text) {
-
-    const message =
-        document.createElement("div");
-
-    message.className =
-        "message " + type;
-
-    const label =
-        document.createElement("div");
-
-    label.className =
-        "label";
-
-    label.textContent =
-        type === "you"
-        ? "Y O U"
-        : "J · A · R · V · I · S ·";
-
-    const content =
-        document.createElement("div");
-
-    content.className =
-        "text";
-
-    content.textContent =
-        text;
-
-    message.appendChild(label);
-    message.appendChild(content);
-
-    chat.appendChild(message);
-
-    window.scrollTo({
-        top: document.body.scrollHeight,
-        behavior: "smooth"
-    });
-
-    return message;
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SR){
+ const rec=new SR();rec.lang='ja-JP';rec.interimResults=true;
+ rec.onstart=()=>{micBtn.textContent='⏺️';statusEl.textContent='● LISTENING...'};
+ rec.onend=()=>{micBtn.textContent='🎙️';setBusy(false)};
+ rec.onresult=e=>{let s='';for(const r of e.results)s+=r[0].transcript;input.value=s};
+ micBtn.onclick=()=>{try{rec.start()}catch{}};
+}else{
+ micBtn.onclick=()=>{input.focus();input.placeholder='iPhoneのキーボードの🎤で話してください';};
 }
 
-
-/* =========================
-   読み上げ
-========================= */
-
-function speak(text) {
-
-    if (!("speechSynthesis" in window)) {
-        return;
-    }
-
-    window.speechSynthesis.cancel();
-
-    const utterance =
-        new SpeechSynthesisUtterance(text);
-
-    utterance.lang = "ja-JP";
-
-    utterance.rate = 0.95;
-
-    utterance.pitch = 0.9;
-
-    utterance.volume = 1.0;
-
-    window.speechSynthesis.speak(
-        utterance
-    );
-}
-
-
-/* =========================
-   Geminiへ送信
-========================= */
-
-async function sendMessage() {
-
-    const message =
-        input.value.trim();
-
-    if (!message) {
-        return;
-    }
-
-    addMessage(
-        "you",
-        message
-    );
-
-    input.value = "";
-
-    statusText.textContent =
-        "J.A.R.V.I.S. IS THINKING...";
-
-    statusText.className =
-        "status";
-
-    sendButton.disabled = true;
-
-    try {
-
-        const response =
-            await fetch(
-                "/chat",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        message: message
-                    })
-                }
-            );
-
-        const data =
-            await response.json();
-
-        if (!response.ok || !data.success) {
-
-            throw new Error(
-                data.error ||
-                "通信エラー"
-            );
-        }
-
-        addMessage(
-            "jarvis",
-            data.response
-        );
-
-        statusText.textContent =
-            "SECURE CHANNEL　//　VOICE + TEXT INTERFACE";
-
-        statusText.className =
-            "status online";
-
-        // 回答を読み上げ
-        speak(data.response);
-
-    } catch (error) {
-
-        console.error(error);
-
-        addMessage(
-            "jarvis",
-            "申し訳ありません、サー。現在AIとの通信に問題が発生しております。少し時間を置いて再度お試しください。"
-        );
-
-        statusText.textContent =
-            "COMMUNICATION ERROR";
-
-        statusText.className =
-            "status error";
-
-    } finally {
-
-        sendButton.disabled = false;
-
-        input.focus();
-    }
-}
-
-
-/* =========================
-   送信ボタン
-========================= */
-
-sendButton.addEventListener(
-    "click",
-    sendMessage
-);
-
-
-/* =========================
-   Enter送信
-========================= */
-
-input.addEventListener(
-    "keydown",
-    function(event) {
-
-        if (
-            event.key === "Enter" &&
-            !event.shiftKey
-        ) {
-
-            event.preventDefault();
-
-            sendMessage();
-        }
-
-    }
-);
-
-
-/* =========================
-   音声入力
-========================= */
-
-const SpeechRecognition =
-    window.SpeechRecognition ||
-    window.webkitSpeechRecognition;
-
-let recognition = null;
-
-let listening = false;
-
-
-if (SpeechRecognition) {
-
-    recognition =
-        new SpeechRecognition();
-
-    recognition.lang =
-        "ja-JP";
-
-    recognition.continuous =
-        false;
-
-    recognition.interimResults =
-        false;
-
-
-    recognition.onstart =
-        function() {
-
-            listening = true;
-
-            micButton.classList.add(
-                "listening"
-            );
-
-            statusText.textContent =
-                "LISTENING...";
-        };
-
-
-    recognition.onresult =
-        function(event) {
-
-            const text =
-                event.results[0][0].transcript;
-
-            input.value = text;
-
-            // 音声入力後、自動送信
-            sendMessage();
-        };
-
-
-    recognition.onerror =
-        function(event) {
-
-            console.error(
-                "Speech recognition error:",
-                event.error
-            );
-
-            statusText.textContent =
-                "VOICE INPUT ERROR";
-
-            statusText.className =
-                "status error";
-        };
-
-
-    recognition.onend =
-        function() {
-
-            listening = false;
-
-            micButton.classList.remove(
-                "listening"
-            );
-
-            if (
-                statusText.textContent ===
-                "LISTENING..."
-            ) {
-
-                statusText.textContent =
-                    "SECURE CHANNEL　//　VOICE + TEXT INTERFACE";
-
-                statusText.className =
-                    "status online";
-            }
-
-        };
-
-
-    micButton.addEventListener(
-        "click",
-        function() {
-
-            if (listening) {
-
-                recognition.stop();
-
-                return;
-            }
-
-            try {
-
-                recognition.start();
-
-            } catch (error) {
-
-                console.error(error);
-
-            }
-
-        }
-    );
-
-} else {
-
-    micButton.addEventListener(
-        "click",
-        function() {
-
-            alert(
-                "このブラウザでは音声入力に対応していません。"
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================
-   初期状態
-========================= */
-
-window.addEventListener(
-    "load",
-    function() {
-
-        input.focus();
-
-    }
-);
-
+history.forEach(x=>add(x.role,x.text,false));
+if(!history.length)add('assistant','システムオンライン。サー、ご命令をどうぞ。');
 </script>
-
 </body>
 </html>
